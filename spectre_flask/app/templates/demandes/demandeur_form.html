@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">{{ title }}</h1>
+<form method="post" class="card card-body shadow-sm">
+{{ form.hidden_tag() }}
+<div class="mb-3">{{ form.type_demandeur.label(class="form-label") }} {{ form.type_demandeur(class="form-select") }}</div>
+<div class="row"><div class="col-md-6 mb-3">{{ form.nom.label(class="form-label") }} {{ form.nom(class="form-control") }}</div><div class="col-md-6 mb-3">{{ form.prenom.label(class="form-label") }} {{ form.prenom(class="form-control") }}</div></div>
+<div class="mb-3">{{ form.raison_sociale.label(class="form-label") }} {{ form.raison_sociale(class="form-control") }}</div>
+<div class="mb-3">{{ form.identifiant.label(class="form-label") }} {{ form.identifiant(class="form-control") }}</div>
+<div class="row"><div class="col-md-6 mb-3">{{ form.email.label(class="form-label") }} {{ form.email(class="form-control") }}</div><div class="col-md-6 mb-3">{{ form.telephone.label(class="form-label") }} {{ form.telephone(class="form-control") }}</div></div>
+<div class="mb-3">{{ form.adresse.label(class="form-label") }} {{ form.adresse(class="form-control") }}</div>
+{{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

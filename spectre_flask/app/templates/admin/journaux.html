@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">Journaux d'activité</h1>
+<table class="table table-sm table-striped">
+<thead><tr><th>Date</th><th>Utilisateur</th><th>Action</th><th>Demande</th><th>Statut</th><th>Commentaire</th></tr></thead>
+<tbody>
+{% for log in logs %}
+<tr>
+<td>{{ log.date_action.strftime('%d/%m/%Y %H:%M') }}</td>
+<td>{{ log.utilisateur.email if log.utilisateur else '-' }}</td>
+<td>{{ log.action }}</td>
+<td>{{ log.demande.reference if log.demande else '-' }}</td>
+<td>{{ log.ancien_statut or '-' }} → {{ log.nouveau_statut or '-' }}</td>
+<td>{{ log.commentaire or '' }}</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Tableau de bord{% endblock %}
+{% block content %}
+<h1 class="h3 mb-4">Tableau de bord</h1>
+<div class="row g-3 mb-4">
+  {% for label, value in [
+    ('Demandeurs', stats.demandeurs), ('Bandes', stats.bandes), ('Demandes', stats.demandes),
+    ('Prêtes à décision', stats.demandes_pretes), ('Validées', stats.demandes_validees),
+    ('Rejetées', stats.demandes_rejetees), ('Autorisations', stats.autorisations)
+  ] %}
+  <div class="col-md-3">
+    <div class="card shadow-sm"><div class="card-body"><div class="text-muted">{{ label }}</div><div class="fs-3 fw-bold">{{ value }}</div></div></div>
+  </div>
+  {% endfor %}
+</div>
+<h2 class="h5">Demandes récentes</h2>
+<table class="table table-striped">
+  <thead><tr><th>Référence</th><th>Objet</th><th>Statut</th><th></th></tr></thead>
+  <tbody>
+  {% for d in recentes %}
+    <tr><td>{{ d.reference }}</td><td>{{ d.objet }}</td><td>{{ d.statut }}</td><td><a href="{{ url_for('demandes.detail', demande_id=d.id) }}">Voir</a></td></tr>
+  {% else %}
+    <tr><td colspan="4" class="text-muted">Aucune demande.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

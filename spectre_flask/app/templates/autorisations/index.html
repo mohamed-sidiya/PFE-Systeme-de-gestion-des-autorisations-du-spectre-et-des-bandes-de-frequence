@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">Autorisations</h1>
+<table class="table table-striped"><thead><tr><th>Numéro</th><th>Demande</th><th>Bande</th><th>Validité</th><th>Statut</th></tr></thead><tbody>
+{% for a in autorisations %}<tr><td>{{ a.numero_autorisation }}</td><td>{{ a.demande.reference }}</td><td>{{ a.bande.designation if a.bande else '-' }}</td><td>{{ a.date_debut }} → {{ a.date_fin }}</td><td>{{ a.statut }}</td></tr>{% else %}<tr><td colspan="5" class="text-muted">Aucune autorisation.</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

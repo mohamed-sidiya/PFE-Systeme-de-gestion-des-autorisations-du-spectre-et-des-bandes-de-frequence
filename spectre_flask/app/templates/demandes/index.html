@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3">Demandes d'autorisation</h1>
+  <a class="btn btn-primary" href="{{ url_for('demandes.demandes_create') }}">Créer</a>
+</div>
+<form method="get" class="row g-2 mb-3"><div class="col-md-5"><input class="form-control" name="q" value="{{ q }}" placeholder="Référence"></div><div class="col-md-4"><select class="form-select" name="statut"><option value="">Tous les statuts</option>{% for code, label in statuts.items() %}<option value="{{ code }}" {% if statut==code %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><div class="col-md-3"><button class="btn btn-outline-primary w-100">Filtrer</button></div></form>
+<table class="table table-striped"><thead><tr><th>Référence</th><th>Demandeur</th><th>Objet</th><th>Statut</th><th>Date</th><th></th></tr></thead><tbody>
+{% for d in demandes %}<tr><td>{{ d.reference }}</td><td>{{ d.demandeur.nom_complet() }}</td><td>{{ d.objet }}</td><td>{{ statuts.get(d.statut, d.statut) }}</td><td>{{ d.date_creation.strftime('%d/%m/%Y') }}</td><td><a href="{{ url_for('demandes.detail', demande_id=d.id) }}">Détail</a></td></tr>{% else %}<tr><td colspan="6" class="text-muted">Aucune demande.</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

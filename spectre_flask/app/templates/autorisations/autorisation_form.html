@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">Générer une autorisation — {{ demande.reference }}</h1>
+<form method="post" class="card card-body shadow-sm">
+{{ form.hidden_tag() }}
+<div class="row"><div class="col-md-6 mb-3">{{ form.date_debut.label(class="form-label") }} {{ form.date_debut(class="form-control") }}</div><div class="col-md-6 mb-3">{{ form.date_fin.label(class="form-label") }} {{ form.date_fin(class="form-control") }}</div></div>
+{{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

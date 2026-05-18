@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">Décision finale — {{ demande.reference }}</h1>
+<form method="post" class="card card-body shadow-sm">
+{{ form.hidden_tag() }}
+<div class="mb-3">{{ form.type_decision.label(class="form-label") }} {{ form.type_decision(class="form-select") }}</div>
+<div class="mb-3">{{ form.motif.label(class="form-label") }} {{ form.motif(class="form-control", rows=4) }}</div>
+{{ form.submit(class="btn btn-success") }}
+</form>
+{% endblock %}

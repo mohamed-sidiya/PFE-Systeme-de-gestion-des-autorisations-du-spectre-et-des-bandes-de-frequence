@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1 class="h3 mb-3">{{ title }}</h1>
+<form method="post" class="card card-body shadow-sm">
+{{ form.hidden_tag() }}
+<div class="row"><div class="col-md-6 mb-3">{{ form.demandeur_id.label(class="form-label") }} {{ form.demandeur_id(class="form-select") }}</div><div class="col-md-6 mb-3">{{ form.bande_id.label(class="form-label") }} {{ form.bande_id(class="form-select") }}</div></div>
+<div class="mb-3">{{ form.objet.label(class="form-label") }} {{ form.objet(class="form-control") }}</div>
+<div class="row"><div class="col-md-6 mb-3">{{ form.type_demande.label(class="form-label") }} {{ form.type_demande(class="form-select") }}</div><div class="col-md-6 mb-3">{{ form.service_concerne.label(class="form-label") }} {{ form.service_concerne(class="form-control") }}</div></div>
+<div class="row"><div class="col-md-4 mb-3">{{ form.frequence_min.label(class="form-label") }} {{ form.frequence_min(class="form-control") }}</div><div class="col-md-4 mb-3">{{ form.frequence_max.label(class="form-label") }} {{ form.frequence_max(class="form-control") }}</div><div class="col-md-4 mb-3">{{ form.unite.label(class="form-label") }} {{ form.unite(class="form-select") }}</div></div>
+<div class="row"><div class="col-md-6 mb-3">{{ form.zone_utilisation.label(class="form-label") }} {{ form.zone_utilisation(class="form-control") }}</div><div class="col-md-6 mb-3">{{ form.puissance.label(class="form-label") }} {{ form.puissance(class="form-control") }}</div></div>
+<div class="row"><div class="col-md-6 mb-3">{{ form.date_debut_souhaitee.label(class="form-label") }} {{ form.date_debut_souhaitee(class="form-control") }}</div><div class="col-md-6 mb-3">{{ form.date_fin_souhaitee.label(class="form-label") }} {{ form.date_fin_souhaitee(class="form-control") }}</div></div>
+<div class="mb-3">{{ form.description.label(class="form-label") }} {{ form.description(class="form-control", rows=4) }}</div>
+{{ form.submit(class="btn btn-primary") }}
+</form>
+{% endblock %}

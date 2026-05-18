@@ -1,0 +1,99 @@
+:root {
+    --ar-primary: #1f356d;
+    --ar-primary-soft: #eef3ff;
+    --ar-border: #e5e7eb;
+}
+
+body {
+    background: #f8fafc;
+}
+
+.app-navbar {
+    background: rgba(255, 255, 255, 0.96);
+    border-bottom: 1px solid var(--ar-border);
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    backdrop-filter: blur(8px);
+}
+
+.app-brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: 72px;
+    padding: 0.35rem 0;
+}
+
+.app-logo {
+    height: 58px;
+    width: auto;
+    object-fit: contain;
+    background: #fff;
+    border-radius: 14px;
+    padding: 0.2rem 0.45rem;
+    box-shadow: 0 4px 14px rgba(31, 53, 109, 0.10);
+}
+
+.app-brand-text {
+    flex-direction: column;
+    line-height: 1.15;
+    border-left: 1px solid var(--ar-border);
+    padding-left: 1rem;
+}
+
+.app-title {
+    color: var(--ar-primary);
+    font-weight: 700;
+    font-size: 0.98rem;
+    letter-spacing: 0.01em;
+}
+
+.app-subtitle {
+    color: #64748b;
+    font-size: 0.78rem;
+    margin-top: 0.2rem;
+}
+
+.app-menu .nav-link {
+    color: #334155;
+    font-weight: 500;
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+}
+
+.app-menu .nav-link:hover,
+.app-menu .nav-link:focus {
+    color: var(--ar-primary);
+    background: var(--ar-primary-soft);
+}
+
+.navbar-toggler {
+    border-color: var(--ar-border);
+}
+
+.card {
+    border: 0;
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.table {
+    background: white;
+}
+
+@media (max-width: 991.98px) {
+    .app-brand {
+        min-height: 64px;
+    }
+
+    .app-logo {
+        height: 48px;
+    }
+
+    .app-menu {
+        margin-top: 1rem;
+    }
+
+    .app-user-box {
+        padding-top: 0.75rem;
+        border-top: 1px solid var(--ar-border);
+    }
+}
