@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, current_user, login_required
+from sqlalchemy import select
 
 from app.extensions import db
 from app.models import User
@@ -16,7 +17,8 @@ def login():
 
     form = LoginForm()
     if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data.lower().strip()).first()
+        email = form.email.data.lower().strip()
+        user = db.session.execute(select(User).filter_by(email=email)).scalar_one_or_none()
         if user and user.check_password(form.password.data) and user.actif:
             user.derniere_connexion = datetime.utcnow()
             db.session.commit()

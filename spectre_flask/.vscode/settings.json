@@ -1,7 +1,7 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}\\spectre_flask\\env\\Scripts\\python.exe",
+  "python.defaultInterpreterPath": "${workspaceFolder}\\env\\Scripts\\python.exe",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}\\spectre_flask"
+    "${workspaceFolder}"
   ],
   "python.pydev.pythonExecutable": "C:\\Users\\medsi\\OneDrive\\Desktop\\monPFE\\spectre_V1.1\\spectre_flask\\env\\Scripts\\python.exe",
   "python.pydev.autoDetectProjects": false,
@@ -13,10 +13,5 @@
   "python.pydev.lint.pylint.use": false,
   "python.pydev.lint.flake8.use": false,
   "python.pydev.lint.ruff.use": false,
-  "python.terminal.activateEnvironment": true,
-  "python.testing.pytestArgs": [
-    "spectre_flask"
-  ],
-  "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.terminal.activateEnvironment": true
 }

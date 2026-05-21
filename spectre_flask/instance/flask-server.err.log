@@ -44,3 +44,5 @@ Press CTRL+C to quit
 127.0.0.1 - - [18/May/2026 02:34:46] "POST /login HTTP/1.1" 200 -
 127.0.0.1 - - [18/May/2026 02:34:46] "GET /static/css/style.css HTTP/1.1" 304 -
 127.0.0.1 - - [18/May/2026 02:34:46] "GET /static/img/logo_autorite_regulation.png HTTP/1.1" 304 -
+127.0.0.1 - - [18/May/2026 17:14:47] "POST /login HTTP/1.1" 400 -
+127.0.0.1 - - [18/May/2026 17:14:47] "GET /favicon.ico HTTP/1.1" 404 -
