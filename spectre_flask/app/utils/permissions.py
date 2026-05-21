@@ -44,3 +44,15 @@ def permission_required(permission_code):
             return view_func(*args, **kwargs)
         return wrapped_view
     return decorator
+
+
+def any_permission_required(*permission_codes):
+    def decorator(view_func):
+        @wraps(view_func)
+        @login_required
+        def wrapped_view(*args, **kwargs):
+            if not any(current_user.can(code) for code in permission_codes):
+                abort(403)
+            return view_func(*args, **kwargs)
+        return wrapped_view
+    return decorator

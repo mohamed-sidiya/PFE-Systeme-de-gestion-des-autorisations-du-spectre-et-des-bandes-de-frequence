@@ -37,6 +37,9 @@
                 {% if current_user.can('gerer_utilisateurs') %}
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.users_index') }}">Utilisateurs</a></li>
                 {% endif %}
+                {% if current_user.can('gerer_roles') %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.roles_index') }}">Rôles</a></li>
+                {% endif %}
                 {% if current_user.can('consulter_journaux') %}
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.journaux') }}">Journaux</a></li>
                 {% endif %}

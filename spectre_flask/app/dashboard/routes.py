@@ -16,7 +16,9 @@ def index():
         "bandes": BandeFrequence.query.count(),
         "demandes": DemandeAutorisation.query.count(),
         "demandes_pretes": DemandeAutorisation.query.filter_by(statut="prete_decision").count(),
-        "demandes_validees": DemandeAutorisation.query.filter_by(statut="validee").count(),
+        "demandes_validees": DemandeAutorisation.query.filter(
+            DemandeAutorisation.statut.in_(("validee", "autorisation_generee"))
+        ).count(),
         "demandes_rejetees": DemandeAutorisation.query.filter_by(statut="rejetee").count(),
         "autorisations": Autorisation.query.count(),
     }

@@ -11,3 +11,10 @@ class UserForm(FlaskForm):
     actif = BooleanField("Compte actif", default=True)
     roles = SelectMultipleField("Rôles", coerce=int)
     submit = SubmitField("Enregistrer")
+
+
+class RoleForm(FlaskForm):
+    nom = StringField("Nom", validators=[DataRequired(), Length(max=100)])
+    description = StringField("Description", validators=[Optional(), Length(max=255)])
+    permissions = SelectMultipleField("Permissions", coerce=int)
+    submit = SubmitField("Enregistrer")

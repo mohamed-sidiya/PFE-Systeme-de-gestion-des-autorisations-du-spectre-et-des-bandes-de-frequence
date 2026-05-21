@@ -2,26 +2,83 @@
 {% block title %}Tableau de bord{% endblock %}
 {% block content %}
 <h1 class="h3 mb-4">Tableau de bord</h1>
+
+{% set dashboard_cards = [
+  {
+    'label': 'Demandeurs',
+    'value': stats.demandeurs,
+    'url': url_for('demandes.demandeurs_index')
+  },
+  {
+    'label': 'Bandes',
+    'value': stats.bandes,
+    'url': url_for('bandes.index')
+  },
+  {
+    'label': 'Demandes',
+    'value': stats.demandes,
+    'url': url_for('demandes.demandes_index')
+  },
+  {
+    'label': 'Prêtes à décision',
+    'value': stats.demandes_pretes,
+    'url': url_for('demandes.demandes_index', statut='prete_decision')
+  },
+  {
+    'label': 'Validées',
+    'value': stats.demandes_validees,
+    'url': url_for('demandes.demandes_index', statut='validee')
+  },
+  {
+    'label': 'Rejetées',
+    'value': stats.demandes_rejetees,
+    'url': url_for('demandes.demandes_index', statut='rejetee')
+  },
+  {
+    'label': 'Autorisations',
+    'value': stats.autorisations,
+    'url': url_for('autorisations.index')
+  }
+] %}
+
 <div class="row g-3 mb-4">
-  {% for label, value in [
-    ('Demandeurs', stats.demandeurs), ('Bandes', stats.bandes), ('Demandes', stats.demandes),
-    ('Prêtes à décision', stats.demandes_pretes), ('Validées', stats.demandes_validees),
-    ('Rejetées', stats.demandes_rejetees), ('Autorisations', stats.autorisations)
-  ] %}
-  <div class="col-md-3">
-    <div class="card shadow-sm"><div class="card-body"><div class="text-muted">{{ label }}</div><div class="fs-3 fw-bold">{{ value }}</div></div></div>
+  {% for card in dashboard_cards %}
+  <div class="col-sm-6 col-lg-3">
+    <a class="card dashboard-card shadow-sm" href="{{ card.url }}">
+      <div class="card-body">
+        <div class="text-muted">{{ card.label }}</div>
+        <div class="fs-3 fw-bold">{{ card.value }}</div>
+      </div>
+    </a>
   </div>
   {% endfor %}
 </div>
+
 <h2 class="h5">Demandes récentes</h2>
-<table class="table table-striped">
-  <thead><tr><th>Référence</th><th>Objet</th><th>Statut</th><th></th></tr></thead>
-  <tbody>
-  {% for d in recentes %}
-    <tr><td>{{ d.reference }}</td><td>{{ d.objet }}</td><td>{{ d.statut }}</td><td><a href="{{ url_for('demandes.detail', demande_id=d.id) }}">Voir</a></td></tr>
-  {% else %}
-    <tr><td colspan="4" class="text-muted">Aucune demande.</td></tr>
-  {% endfor %}
-  </tbody>
-</table>
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Référence</th>
+        <th>Objet</th>
+        <th>Statut</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for d in recentes %}
+      <tr>
+        <td class="text-nowrap">{{ d.reference }}</td>
+        <td class="text-break">{{ d.objet }}</td>
+        <td>{{ d.statut }}</td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-primary" href="{{ url_for('demandes.detail', demande_id=d.id) }}">Voir</a>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="text-muted">Aucune demande.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

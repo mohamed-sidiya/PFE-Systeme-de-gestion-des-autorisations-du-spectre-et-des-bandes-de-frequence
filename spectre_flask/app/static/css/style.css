@@ -6,6 +6,11 @@
 
 body {
     background: #f8fafc;
+    overflow-x: hidden;
+}
+
+.navbar .container-fluid {
+    min-width: 0;
 }
 
 .app-navbar {
@@ -20,6 +25,7 @@ body {
     align-items: center;
     gap: 1rem;
     min-height: 72px;
+    min-width: 0;
     padding: 0.35rem 0;
 }
 
@@ -37,6 +43,7 @@ body {
     flex-direction: column;
     line-height: 1.15;
     border-left: 1px solid var(--ar-border);
+    min-width: 0;
     padding-left: 1rem;
 }
 
@@ -45,6 +52,7 @@ body {
     font-weight: 700;
     font-size: 0.98rem;
     letter-spacing: 0.01em;
+    white-space: normal;
 }
 
 .app-subtitle {
@@ -60,6 +68,16 @@ body {
     padding: 0.45rem 0.75rem;
 }
 
+.app-menu {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    row-gap: 0.25rem;
+}
+
+.app-user-box {
+    flex-shrink: 0;
+}
+
 .app-menu .nav-link:hover,
 .app-menu .nav-link:focus {
     color: var(--ar-primary);
@@ -73,6 +91,25 @@ body {
 .card {
     border: 0;
     box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.dashboard-card {
+    color: inherit;
+    height: 100%;
+    text-decoration: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.dashboard-card:hover,
+.dashboard-card:focus {
+    color: inherit;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+    transform: translateY(-2px);
+}
+
+.dashboard-card:focus-visible {
+    outline: 3px solid rgba(31, 53, 109, 0.25);
+    outline-offset: 3px;
 }
 
 .table {

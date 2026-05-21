@@ -4,52 +4,87 @@
   <h1 class="h3">Demande {{ demande.reference }}</h1>
   <span class="badge bg-info text-dark">{{ statuts.get(demande.statut, demande.statut) }}</span>
 </div>
-<div class="card mb-3"><div class="card-body">
-<p><strong>Demandeur :</strong> {{ demande.demandeur.nom_complet() }}</p>
-<p><strong>Objet :</strong> {{ demande.objet }}</p>
-<p><strong>Bande :</strong> {{ demande.bande.designation if demande.bande else '-' }}</p>
-<p><strong>Zone :</strong> {{ demande.zone_utilisation or '-' }}</p>
-<p><strong>Description :</strong> {{ demande.description or '-' }}</p>
-</div></div>
 
-<div class="row g-3">
-  <div class="col-md-6">
-    <div class="card"><div class="card-body"><h2 class="h5">Pièces jointes</h2>
-      <ul>{% for p in demande.pieces_jointes %}<li>{{ p.nom_original }} — {{ p.type_document or 'Document' }}</li>{% else %}<li class="text-muted">Aucune pièce.</li>{% endfor %}</ul>
-      <form method="post" enctype="multipart/form-data" action="{{ url_for('demandes.add_piece', demande_id=demande.id) }}">
-        {{ piece_form.hidden_tag() }}
-        {{ piece_form.type_document(class="form-control mb-2", placeholder="Type de document") }}
-        {{ piece_form.fichier(class="form-control mb-2") }}
-        {{ piece_form.submit(class="btn btn-sm btn-primary") }}
-      </form>
-    </div></div>
-  </div>
-  <div class="col-md-6">
-    <div class="card"><div class="card-body"><h2 class="h5">Observations</h2>
-      <ul>{% for o in demande.observations %}<li><strong>{{ o.type_observation }}</strong> : {{ o.contenu }}</li>{% else %}<li class="text-muted">Aucune observation.</li>{% endfor %}</ul>
-      <form method="post" action="{{ url_for('demandes.add_observation', demande_id=demande.id) }}">
-        {{ obs_form.hidden_tag() }}
-        {{ obs_form.type_observation(class="form-select mb-2") }}
-        {{ obs_form.contenu(class="form-control mb-2", rows=3) }}
-        {{ obs_form.submit(class="btn btn-sm btn-primary") }}
-      </form>
-    </div></div>
+<div class="card mb-3">
+  <div class="card-body">
+    <p><strong>Demandeur :</strong> {{ demande.demandeur.nom_complet() }}</p>
+    <p><strong>Objet :</strong> {{ demande.objet }}</p>
+    <p><strong>Bande :</strong> {{ demande.bande.designation if demande.bande else '-' }}</p>
+    <p><strong>Zone :</strong> {{ demande.zone_utilisation or '-' }}</p>
+    <p><strong>Description :</strong> {{ demande.description or '-' }}</p>
+    {% if demande.autorisation %}
+    <p><strong>Autorisation :</strong> {{ demande.autorisation.numero_autorisation }}</p>
+    {% endif %}
   </div>
 </div>
 
-<div class="card mt-3"><div class="card-body"><h2 class="h5">Workflow</h2>
-{% if statut_form.nouveau_statut.choices %}
-<form method="post" action="{{ url_for('demandes.change_statut', demande_id=demande.id) }}" class="row g-2">
-  {{ statut_form.hidden_tag() }}
-  <div class="col-md-4">{{ statut_form.nouveau_statut(class="form-select") }}</div>
-  <div class="col-md-6">{{ statut_form.commentaire(class="form-control", placeholder="Commentaire") }}</div>
-  <div class="col-md-2">{{ statut_form.submit(class="btn btn-warning w-100") }}</div>
-</form>
-{% else %}<p class="text-muted">Aucune transition disponible.</p>{% endif %}
-</div></div>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h5">Pièces jointes</h2>
+        <ul>
+          {% for p in demande.pieces_jointes %}
+          <li>{{ p.nom_original }} - {{ p.type_document or 'Document' }}</li>
+          {% else %}
+          <li class="text-muted">Aucune pièce.</li>
+          {% endfor %}
+        </ul>
+        <form method="post" enctype="multipart/form-data" action="{{ url_for('demandes.add_piece', demande_id=demande.id) }}">
+          {{ piece_form.hidden_tag() }}
+          {{ piece_form.type_document(class="form-control mb-2", placeholder="Type de document") }}
+          {{ piece_form.fichier(class="form-control mb-2") }}
+          {{ piece_form.submit(class="btn btn-sm btn-primary") }}
+        </form>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="h5">Observations</h2>
+        <ul>
+          {% for o in demande.observations %}
+          <li><strong>{{ o.type_observation }}</strong> : {{ o.contenu }}</li>
+          {% else %}
+          <li class="text-muted">Aucune observation.</li>
+          {% endfor %}
+        </ul>
+        <form method="post" action="{{ url_for('demandes.add_observation', demande_id=demande.id) }}">
+          {{ obs_form.hidden_tag() }}
+          {{ obs_form.type_observation(class="form-select mb-2") }}
+          {{ obs_form.contenu(class="form-control mb-2", rows=3) }}
+          {{ obs_form.submit(class="btn btn-sm btn-primary") }}
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
-<div class="mt-3">
-{% if demande.statut == 'prete_decision' %}<a class="btn btn-success" href="{{ url_for('autorisations.decider', demande_id=demande.id) }}">Décider</a>{% endif %}
-{% if demande.statut == 'validee' and demande.decision %}<a class="btn btn-primary" href="{{ url_for('autorisations.generer', demande_id=demande.id) }}">Générer l'autorisation</a>{% endif %}
+<div class="card mt-3">
+  <div class="card-body">
+    <h2 class="h5">Workflow</h2>
+    {% if statut_form.nouveau_statut.choices %}
+    <form method="post" action="{{ url_for('demandes.change_statut', demande_id=demande.id) }}" class="row g-2">
+      {{ statut_form.hidden_tag() }}
+      <div class="col-md-4">{{ statut_form.nouveau_statut(class="form-select") }}</div>
+      <div class="col-md-6">{{ statut_form.commentaire(class="form-control", placeholder="Commentaire") }}</div>
+      <div class="col-md-2">{{ statut_form.submit(class="btn btn-warning w-100") }}</div>
+    </form>
+    {% elif demande.statut == 'prete_decision' %}
+    <p class="text-muted mb-0">Le dossier est prêt à décision. Utilisez l'action de décision finale.</p>
+    {% else %}
+    <p class="text-muted mb-0">Aucune transition disponible.</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="mt-3 d-flex gap-2">
+  {% if demande.statut == 'prete_decision' %}
+  <a class="btn btn-success" href="{{ url_for('autorisations.decider', demande_id=demande.id) }}">Décider</a>
+  {% endif %}
+  {% if demande.statut == 'validee' and demande.decision and not demande.autorisation %}
+  <a class="btn btn-primary" href="{{ url_for('autorisations.generer', demande_id=demande.id) }}">Générer l'autorisation</a>
+  {% endif %}
 </div>
 {% endblock %}

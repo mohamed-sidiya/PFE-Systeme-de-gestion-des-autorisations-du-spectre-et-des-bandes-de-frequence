@@ -213,7 +213,7 @@ class DemandeAutorisation(db.Model):
         self.date_derniere_modification = datetime.utcnow()
 
     def peut_generer_autorisation(self):
-        return self.statut == "validee" and self.decision is not None
+        return self.statut == "validee" and self.decision is not None and self.autorisation is None
 
     def __repr__(self):
         return f"<DemandeAutorisation {self.reference}>"

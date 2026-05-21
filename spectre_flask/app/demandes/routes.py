@@ -49,7 +49,10 @@ def demandes_index():
     if q:
         query = query.filter(DemandeAutorisation.reference.ilike(f"%{q}%"))
     if statut:
-        query = query.filter_by(statut=statut)
+        if statut == "validee":
+            query = query.filter(DemandeAutorisation.statut.in_(("validee", "autorisation_generee")))
+        else:
+            query = query.filter_by(statut=statut)
     demandes = query.order_by(DemandeAutorisation.date_creation.desc()).all()
     return render_template("demandes/index.html", demandes=demandes, q=q, statut=statut, statuts=STATUTS_DEMANDE)
 

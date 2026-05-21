@@ -1,11 +1,10 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
-from flask_login import login_required
 
 from app.extensions import db
-from app.models import User, Role, HistoriqueAction
+from app.models import User, Role, Permission, HistoriqueAction
 from app.utils.permissions import permission_required
 from app.utils.audit import log_action
-from .forms import UserForm
+from .forms import UserForm, RoleForm
 
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
@@ -52,6 +51,60 @@ def users_toggle(user_id):
     db.session.commit()
     flash("Statut du compte modifié.", "info")
     return redirect(url_for("admin.users_index"))
+
+
+@admin_bp.route("/roles")
+@permission_required("gerer_roles")
+def roles_index():
+    roles = Role.query.order_by(Role.nom.asc()).all()
+    return render_template("admin/roles_index.html", roles=roles)
+
+
+@admin_bp.route("/roles/create", methods=["GET", "POST"])
+@permission_required("gerer_roles")
+def roles_create():
+    form = RoleForm()
+    permissions = Permission.query.order_by(Permission.code.asc()).all()
+    form.permissions.choices = [(p.id, p.code) for p in permissions]
+    if form.validate_on_submit():
+        role = Role(nom=form.nom.data.strip(), description=form.description.data)
+        selected_permissions = (
+            Permission.query.filter(Permission.id.in_(form.permissions.data)).all()
+            if form.permissions.data
+            else []
+        )
+        role.permissions = selected_permissions
+        db.session.add(role)
+        db.session.flush()
+        log_action("Création rôle", entite="roles", entite_id=role.id)
+        db.session.commit()
+        flash("Rôle créé.", "success")
+        return redirect(url_for("admin.roles_index"))
+    return render_template("admin/role_form.html", form=form, title="Créer un rôle")
+
+
+@admin_bp.route("/roles/<int:role_id>/edit", methods=["GET", "POST"])
+@permission_required("gerer_roles")
+def roles_edit(role_id):
+    role = Role.query.get_or_404(role_id)
+    form = RoleForm(obj=role)
+    permissions = Permission.query.order_by(Permission.code.asc()).all()
+    form.permissions.choices = [(p.id, p.code) for p in permissions]
+    if form.validate_on_submit():
+        role.nom = form.nom.data.strip()
+        role.description = form.description.data
+        selected_permissions = (
+            Permission.query.filter(Permission.id.in_(form.permissions.data)).all()
+            if form.permissions.data
+            else []
+        )
+        role.permissions = selected_permissions
+        log_action("Modification rôle", entite="roles", entite_id=role.id)
+        db.session.commit()
+        flash("Rôle modifié.", "success")
+        return redirect(url_for("admin.roles_index"))
+    form.permissions.data = [p.id for p in role.permissions.all()]
+    return render_template("admin/role_form.html", form=form, title="Modifier un rôle")
 
 
 @admin_bp.route("/journaux")

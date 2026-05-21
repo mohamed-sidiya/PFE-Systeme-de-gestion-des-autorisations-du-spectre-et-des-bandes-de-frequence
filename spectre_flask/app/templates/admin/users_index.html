@@ -4,17 +4,40 @@
   <h1 class="h3">Utilisateurs</h1>
   <a class="btn btn-primary" href="{{ url_for('admin.users_create') }}">Créer</a>
 </div>
-<table class="table table-striped">
-<thead><tr><th>Nom</th><th>Email</th><th>Rôles</th><th>Actif</th><th></th></tr></thead>
-<tbody>
-{% for u in users %}
-<tr>
-  <td>{{ u.nom }} {{ u.prenom or '' }}</td><td>{{ u.email }}</td>
-  <td>{% for r in u.roles.all() %}<span class="badge bg-secondary">{{ r.nom }}</span> {% endfor %}</td>
-  <td>{{ 'Oui' if u.actif else 'Non' }}</td>
-  <td><form method="post" action="{{ url_for('admin.users_toggle', user_id=u.id) }}">{{ csrf_token() }}<button class="btn btn-sm btn-outline-warning">Activer/Désactiver</button></form></td>
-</tr>
-{% endfor %}
-</tbody>
-</table>
+
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr>
+        <th>Nom</th>
+        <th>Email</th>
+        <th>Rôles</th>
+        <th>Actif</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u.nom }} {{ u.prenom or '' }}</td>
+        <td>{{ u.email }}</td>
+        <td>
+          {% for r in u.roles.all() %}
+          <span class="badge bg-secondary">{{ r.nom }}</span>
+          {% endfor %}
+        </td>
+        <td>{{ 'Oui' if u.actif else 'Non' }}</td>
+        <td class="text-end">
+          <form method="post" action="{{ url_for('admin.users_toggle', user_id=u.id) }}" class="d-inline">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn btn-sm btn-outline-warning">
+              {{ 'Désactiver' if u.actif else 'Activer' }}
+            </button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}
