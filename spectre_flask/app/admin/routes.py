@@ -1,8 +1,9 @@
 from flask import Blueprint, render_template, redirect, url_for, flash
+from sqlalchemy import select
 
 from app.extensions import db
 from app.models import User, Role, Permission, HistoriqueAction
-from app.utils.permissions import permission_required
+from app.utils.permissions import permission_required, permission_label
 from app.utils.audit import log_action
 from .forms import UserForm, RoleForm
 
@@ -13,7 +14,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 @admin_bp.route("/users")
 @permission_required("gerer_utilisateurs")
 def users_index():
-    users = User.query.order_by(User.nom.asc()).all()
+    users = db.session.scalars(select(User).order_by(User.nom.asc())).all()
     return render_template("admin/users_index.html", users=users)
 
 
@@ -21,7 +22,7 @@ def users_index():
 @permission_required("gerer_utilisateurs")
 def users_create():
     form = UserForm()
-    roles = Role.query.order_by(Role.nom.asc()).all()
+    roles = db.session.scalars(select(Role).order_by(Role.nom.asc())).all()
     form.roles.choices = [(r.id, r.nom) for r in roles]
     if form.validate_on_submit():
         user = User(
@@ -31,7 +32,11 @@ def users_create():
             actif=form.actif.data,
         )
         user.set_password(form.password.data or "password123")
-        selected_roles = Role.query.filter(Role.id.in_(form.roles.data)).all() if form.roles.data else []
+        selected_roles = (
+            db.session.scalars(select(Role).where(Role.id.in_(form.roles.data))).all()
+            if form.roles.data
+            else []
+        )
         user.roles = selected_roles
         db.session.add(user)
         db.session.flush()
@@ -45,7 +50,7 @@ def users_create():
 @admin_bp.route("/users/<int:user_id>/toggle", methods=["POST"])
 @permission_required("gerer_utilisateurs")
 def users_toggle(user_id):
-    user = User.query.get_or_404(user_id)
+    user = db.get_or_404(User, user_id)
     user.actif = not user.actif
     log_action("Activation/désactivation utilisateur", entite="users", entite_id=user.id)
     db.session.commit()
@@ -56,20 +61,20 @@ def users_toggle(user_id):
 @admin_bp.route("/roles")
 @permission_required("gerer_roles")
 def roles_index():
-    roles = Role.query.order_by(Role.nom.asc()).all()
-    return render_template("admin/roles_index.html", roles=roles)
+    roles = db.session.scalars(select(Role).order_by(Role.nom.asc())).all()
+    return render_template("admin/roles_index.html", roles=roles, permission_label=permission_label)
 
 
 @admin_bp.route("/roles/create", methods=["GET", "POST"])
 @permission_required("gerer_roles")
 def roles_create():
     form = RoleForm()
-    permissions = Permission.query.order_by(Permission.code.asc()).all()
-    form.permissions.choices = [(p.id, p.code) for p in permissions]
+    permissions = db.session.scalars(select(Permission).order_by(Permission.code.asc())).all()
+    form.permissions.choices = [(p.id, permission_label(p.code)) for p in permissions]
     if form.validate_on_submit():
         role = Role(nom=form.nom.data.strip(), description=form.description.data)
         selected_permissions = (
-            Permission.query.filter(Permission.id.in_(form.permissions.data)).all()
+            db.session.scalars(select(Permission).where(Permission.id.in_(form.permissions.data))).all()
             if form.permissions.data
             else []
         )
@@ -86,15 +91,15 @@ def roles_create():
 @admin_bp.route("/roles/<int:role_id>/edit", methods=["GET", "POST"])
 @permission_required("gerer_roles")
 def roles_edit(role_id):
-    role = Role.query.get_or_404(role_id)
+    role = db.get_or_404(Role, role_id)
     form = RoleForm(obj=role)
-    permissions = Permission.query.order_by(Permission.code.asc()).all()
-    form.permissions.choices = [(p.id, p.code) for p in permissions]
+    permissions = db.session.scalars(select(Permission).order_by(Permission.code.asc())).all()
+    form.permissions.choices = [(p.id, permission_label(p.code)) for p in permissions]
     if form.validate_on_submit():
         role.nom = form.nom.data.strip()
         role.description = form.description.data
         selected_permissions = (
-            Permission.query.filter(Permission.id.in_(form.permissions.data)).all()
+            db.session.scalars(select(Permission).where(Permission.id.in_(form.permissions.data))).all()
             if form.permissions.data
             else []
         )
@@ -110,5 +115,7 @@ def roles_edit(role_id):
 @admin_bp.route("/journaux")
 @permission_required("consulter_journaux")
 def journaux():
-    logs = HistoriqueAction.query.order_by(HistoriqueAction.date_action.desc()).limit(200).all()
+    logs = db.session.scalars(
+        select(HistoriqueAction).order_by(HistoriqueAction.date_action.desc()).limit(200)
+    ).all()
     return render_template("admin/journaux.html", logs=logs)

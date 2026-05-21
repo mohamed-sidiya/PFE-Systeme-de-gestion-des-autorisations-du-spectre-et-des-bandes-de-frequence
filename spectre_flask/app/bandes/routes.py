@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
+from sqlalchemy import select
 
 from app.extensions import db
 from app.models import BandeFrequence
@@ -14,10 +15,10 @@ bandes_bp = Blueprint("bandes", __name__, url_prefix="/bandes")
 @permission_required("gerer_bandes")
 def index():
     q = request.args.get("q", "").strip()
-    query = BandeFrequence.query
+    stmt = select(BandeFrequence)
     if q:
-        query = query.filter(BandeFrequence.designation.ilike(f"%{q}%"))
-    bandes = query.order_by(BandeFrequence.designation.asc()).all()
+        stmt = stmt.where(BandeFrequence.designation.ilike(f"%{q}%"))
+    bandes = db.session.scalars(stmt.order_by(BandeFrequence.designation.asc())).all()
     return render_template("bandes/index.html", bandes=bandes, q=q)
 
 
@@ -47,7 +48,7 @@ def create():
 @bandes_bp.route("/<int:bande_id>/edit", methods=["GET", "POST"])
 @permission_required("gerer_bandes")
 def edit(bande_id):
-    bande = BandeFrequence.query.get_or_404(bande_id)
+    bande = db.get_or_404(BandeFrequence, bande_id)
     form = BandeForm(obj=bande)
     if form.validate_on_submit():
         form.populate_obj(bande)

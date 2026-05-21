@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import current_user
+from sqlalchemy import select
 
 from app.extensions import db
 from app.models import (
@@ -20,7 +21,9 @@ demandes_bp = Blueprint("demandes", __name__)
 @demandes_bp.route("/demandeurs")
 @permission_required("gerer_demandeurs")
 def demandeurs_index():
-    demandeurs = Demandeur.query.order_by(Demandeur.date_creation.desc()).all()
+    demandeurs = db.session.scalars(
+        select(Demandeur).order_by(Demandeur.date_creation.desc())
+    ).all()
     return render_template("demandes/demandeurs_index.html", demandeurs=demandeurs)
 
 
@@ -45,15 +48,15 @@ def demandeurs_create():
 def demandes_index():
     q = request.args.get("q", "").strip()
     statut = request.args.get("statut", "").strip()
-    query = DemandeAutorisation.query
+    stmt = select(DemandeAutorisation)
     if q:
-        query = query.filter(DemandeAutorisation.reference.ilike(f"%{q}%"))
+        stmt = stmt.where(DemandeAutorisation.reference.ilike(f"%{q}%"))
     if statut:
         if statut == "validee":
-            query = query.filter(DemandeAutorisation.statut.in_(("validee", "autorisation_generee")))
+            stmt = stmt.where(DemandeAutorisation.statut.in_(("validee", "autorisation_generee")))
         else:
-            query = query.filter_by(statut=statut)
-    demandes = query.order_by(DemandeAutorisation.date_creation.desc()).all()
+            stmt = stmt.where(DemandeAutorisation.statut == statut)
+    demandes = db.session.scalars(stmt.order_by(DemandeAutorisation.date_creation.desc())).all()
     return render_template("demandes/index.html", demandes=demandes, q=q, statut=statut, statuts=STATUTS_DEMANDE)
 
 
@@ -61,8 +64,8 @@ def demandes_index():
 @permission_required("creer_demande")
 def demandes_create():
     form = DemandeForm()
-    demandeurs = Demandeur.query.order_by(Demandeur.date_creation.desc()).all()
-    bandes = BandeFrequence.query.order_by(BandeFrequence.designation.asc()).all()
+    demandeurs = db.session.scalars(select(Demandeur).order_by(Demandeur.date_creation.desc())).all()
+    bandes = db.session.scalars(select(BandeFrequence).order_by(BandeFrequence.designation.asc())).all()
     form.demandeur_id.choices = [(d.id, d.nom_complet()) for d in demandeurs]
     form.bande_id.choices = [(0, "-- Non précisée --")] + [(b.id, b.designation) for b in bandes]
 
@@ -97,7 +100,7 @@ def demandes_create():
 @demandes_bp.route("/demandes/<int:demande_id>")
 @permission_required("consulter_demande")
 def detail(demande_id):
-    demande = DemandeAutorisation.query.get_or_404(demande_id)
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
     piece_form = PieceJointeForm()
     obs_form = ObservationForm()
     statut_form = StatutForm()
@@ -115,7 +118,7 @@ def detail(demande_id):
 @demandes_bp.route("/demandes/<int:demande_id>/piece", methods=["POST"])
 @permission_required("ajouter_piece")
 def add_piece(demande_id):
-    demande = DemandeAutorisation.query.get_or_404(demande_id)
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
     form = PieceJointeForm()
     if form.validate_on_submit():
         original, stored, path = save_upload(form.fichier.data)
@@ -141,7 +144,7 @@ def add_piece(demande_id):
 @demandes_bp.route("/demandes/<int:demande_id>/observation", methods=["POST"])
 @permission_required("ajouter_observation")
 def add_observation(demande_id):
-    demande = DemandeAutorisation.query.get_or_404(demande_id)
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
     form = ObservationForm()
     if form.validate_on_submit():
         observation = Observation(
@@ -160,7 +163,7 @@ def add_observation(demande_id):
 @demandes_bp.route("/demandes/<int:demande_id>/statut", methods=["POST"])
 @permission_required("verifier_dossier")
 def change_statut(demande_id):
-    demande = DemandeAutorisation.query.get_or_404(demande_id)
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
     form = StatutForm()
     form.nouveau_statut.choices = [(s, STATUTS_DEMANDE[s]) for s in statuts_suivants(demande.statut)]
     if form.validate_on_submit():

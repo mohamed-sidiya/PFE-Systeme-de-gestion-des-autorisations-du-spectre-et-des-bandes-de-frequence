@@ -2,6 +2,7 @@ from datetime import date, timedelta
 
 from flask import Blueprint, render_template, redirect, url_for, flash, abort
 from flask_login import current_user
+from sqlalchemy import select
 
 from app.extensions import db
 from app.models import DemandeAutorisation, Decision, Autorisation
@@ -17,14 +18,16 @@ autorisations_bp = Blueprint("autorisations", __name__)
 @autorisations_bp.route("/autorisations")
 @permission_required("consulter_demande")
 def index():
-    autorisations = Autorisation.query.order_by(Autorisation.date_creation.desc()).all()
+    autorisations = db.session.scalars(
+        select(Autorisation).order_by(Autorisation.date_creation.desc())
+    ).all()
     return render_template("autorisations/index.html", autorisations=autorisations)
 
 
 @autorisations_bp.route("/demandes/<int:demande_id>/decider", methods=["GET", "POST"])
 @any_permission_required("valider_demande", "rejeter_demande")
 def decider(demande_id):
-    demande = DemandeAutorisation.query.get_or_404(demande_id)
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
     if demande.statut != "prete_decision":
         flash("La demande doit être au statut 'Prête à décision'.", "warning")
         return redirect(url_for("demandes.detail", demande_id=demande.id))
@@ -93,7 +96,7 @@ def decider(demande_id):
 @autorisations_bp.route("/demandes/<int:demande_id>/generer", methods=["GET", "POST"])
 @permission_required("generer_autorisation")
 def generer(demande_id):
-    demande = DemandeAutorisation.query.get_or_404(demande_id)
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
     if not demande.peut_generer_autorisation():
         flash("L'autorisation ne peut être générée que pour une demande validée sans autorisation existante.", "warning")
         return redirect(url_for("demandes.detail", demande_id=demande.id))

@@ -1,5 +1,6 @@
 import click
 from flask.cli import with_appcontext
+from sqlalchemy import select
 
 from .extensions import db
 from .models import User, Role, Permission
@@ -17,14 +18,16 @@ def seed_command():
 
     permissions = {}
     for code, description in PERMISSIONS_INITIALES:
-        permission = Permission.query.filter_by(code=code).first()
+        permission = db.session.scalar(select(Permission).where(Permission.code == code))
         if permission is None:
             permission = Permission(code=code, description=description)
             db.session.add(permission)
+        else:
+            permission.description = description
         permissions[code] = permission
 
     for role_name, permission_codes in ROLES_INITIAUX.items():
-        role = Role.query.filter_by(nom=role_name).first()
+        role = db.session.scalar(select(Role).where(Role.nom == role_name))
         if role is None:
             role = Role(nom=role_name, description=f"Rôle {role_name}")
             db.session.add(role)
@@ -33,7 +36,7 @@ def seed_command():
             if permission not in role.permissions.all():
                 role.permissions.append(permission)
 
-    admin = User.query.filter(User.email.in_(ADMIN_EMAILS)).first()
+    admin = db.session.scalar(select(User).where(User.email.in_(ADMIN_EMAILS)))
     if admin is None:
         admin = User(nom="Administrateur", prenom="Systeme", email=DEFAULT_ADMIN_EMAIL, actif=True)
         admin.set_password("admin123")
@@ -41,9 +44,9 @@ def seed_command():
     else:
         admin.email = DEFAULT_ADMIN_EMAIL
 
-    admin_role = Role.query.filter_by(nom="Administrateur").first()
+    admin_role = db.session.scalar(select(Role).where(Role.nom == "Administrateur"))
     if admin_role and admin_role not in admin.roles.all():
         admin.roles.append(admin_role)
 
     db.session.commit()
-    click.echo(f"Donnees initiales creees. Compte : {DEFAULT_ADMIN_EMAIL} / admin123")
+    click.echo(f"Données initiales créées. Compte : {DEFAULT_ADMIN_EMAIL} / admin123")
