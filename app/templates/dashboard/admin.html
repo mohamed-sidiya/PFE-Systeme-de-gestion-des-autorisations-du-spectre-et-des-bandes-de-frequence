@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Tableau de bord administrateur</h2>
+<div class="row g-3">
+  {% for label, value in stats.items() %}
+  <div class="col-md-3"><div class="card p-3"><div class="text-muted">{{ label }}</div><h3>{{ value }}</h3></div></div>
+  {% endfor %}
+</div>
+{% endblock %}

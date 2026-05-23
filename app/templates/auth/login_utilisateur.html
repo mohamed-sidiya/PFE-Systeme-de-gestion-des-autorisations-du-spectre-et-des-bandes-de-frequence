@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Connexion utilisateur{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-5">
+    <div class="card p-4">
+      <h3 class="mb-2 login-card-title">Connexion utilisateur</h3>
+      <p class="text-muted small mb-4">Espace reserve aux entreprises et organismes dont le compte a ete valide.</p>
+      <form method="post">
+        {{ form.hidden_tag() }}
+        <div class="mb-3">{{ form.email.label(class="form-label") }}{{ form.email(class="form-control", placeholder="email professionnel") }}</div>
+        <div class="mb-3">{{ form.password.label(class="form-label") }}{{ form.password(class="form-control", placeholder="mot de passe") }}</div>
+        <div class="form-check mb-3">{{ form.remember(class="form-check-input") }}{{ form.remember.label(class="form-check-label") }}</div>
+        {{ form.submit(class="btn btn-primary w-100") }}
+      </form>
+      <hr>
+      <a href="{{ url_for('auth.register') }}">Creer un compte utilisateur</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

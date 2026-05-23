@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Traitement de la demande {{ demande.reference }}</h2>
+<div class="card p-4 mb-3">
+<p><strong>Utilisateur :</strong> {{ demande.utilisateur.profil.raison_sociale if demande.utilisateur.profil else demande.utilisateur.email }}</p>
+<p><strong>Objet :</strong> {{ demande.objet }}</p>
+<p><strong>Statut :</strong> <span class="badge bg-primary">{{ demande.statut }}</span></p>
+<p><strong>Bande :</strong> {{ demande.bande.designation if demande.bande else '-' }}</p>
+<p><strong>Fréquence :</strong> {{ demande.frequence_min or '-' }} - {{ demande.frequence_max or '-' }} {{ demande.unite }}</p>
+<p><strong>Description :</strong> {{ demande.description or '-' }}</p>
+</div>
+
+<div class="card p-4 mb-3">
+<h4>Actions</h4>
+{% if demande.statut in ['soumise','completee'] %}
+<form class="d-inline" method="post" action="{{ url_for('agent.traiter', demande_id=demande.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-primary">Prendre en traitement</button></form>
+{% endif %}
+{% if demande.statut == 'en_traitement' %}
+<form class="mb-3 mt-3" method="post" action="{{ url_for('agent.demander_complement', demande_id=demande.id) }}">
+{{ complement_form.hidden_tag() }}
+{{ complement_form.motif(class="form-control mb-2", rows=2, placeholder="Motif du complément") }}
+{{ complement_form.submit(class="btn btn-warning") }}
+</form>
+<form class="mb-3" method="post" action="{{ url_for('agent.valider', demande_id=demande.id) }}">
+{{ decision_form.hidden_tag() }}
+{{ decision_form.motif(class="form-control mb-2", rows=2, placeholder="Motif de validation") }}
+<button class="btn btn-success">Valider la demande</button>
+</form>
+<form method="post" action="{{ url_for('agent.rejeter', demande_id=demande.id) }}">
+{{ decision_form.hidden_tag() }}
+{{ decision_form.motif(class="form-control mb-2", rows=2, placeholder="Motif du rejet") }}
+<button class="btn btn-danger">Rejeter la demande</button>
+</form>
+{% endif %}
+{% if demande.statut == 'validee' and not demande.autorisation %}
+<form class="mt-3" method="post" action="{{ url_for('agent.generer_autorisation', demande_id=demande.id) }}">
+{{ autorisation_form.hidden_tag() }}
+<div class="row">
+<div class="col-md-4">{{ autorisation_form.date_debut.label(class="form-label") }}{{ autorisation_form.date_debut(class="form-control") }}</div>
+<div class="col-md-4">{{ autorisation_form.date_fin.label(class="form-label") }}{{ autorisation_form.date_fin(class="form-control") }}</div>
+<div class="col-md-4 pt-4">{{ autorisation_form.submit(class="btn btn-success") }}</div>
+</div>
+</form>
+{% endif %}
+</div>
+
+<div class="card p-4 mb-3">
+<h4>Observation agent</h4>
+<form method="post" action="{{ url_for('agent.observation', demande_id=demande.id) }}">
+{{ observation_form.hidden_tag() }}
+{{ observation_form.contenu(class="form-control mb-2", rows=2) }}
+{{ observation_form.submit(class="btn btn-outline-primary") }}
+</form>
+</div>
+
+<div class="card p-4">
+<h4>Pièces et observations</h4>
+<h6>Pièces</h6>
+<ul>{% for p in demande.pieces_jointes %}<li>{{ p.nom_original }} — {{ p.type_document or '-' }}</li>{% else %}<li>Aucune pièce</li>{% endfor %}</ul>
+<h6>Observations</h6>
+<ul>{% for o in demande.observations %}<li><strong>{{ o.type_observation }}</strong> — {{ o.contenu }}</li>{% else %}<li>Aucune observation</li>{% endfor %}</ul>
+</div>
+{% endblock %}

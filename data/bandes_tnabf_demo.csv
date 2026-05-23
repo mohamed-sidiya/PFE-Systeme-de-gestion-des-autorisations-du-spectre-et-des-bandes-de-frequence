@@ -1,0 +1,11 @@
+designation,frequence_debut,frequence_fin,unite,usage_service,statut,description
+Radiodiffusion FM,87.500,108.000,MHz,RADIODIFFUSION,reference,"Référence TNABF : bande FM 87,5-108 MHz."
+Mobile aéronautique,117.975,137.000,MHz,MOBILE AÉRONAUTIQUE,reference,Référence TNABF : communications aéronautiques.
+Amateur 144-146 MHz,144.000,146.000,MHz,AMATEUR,reference,Référence TNABF : service amateur.
+VHF maritime canal 16,156.787,156.813,MHz,MOBILE MARITIME,reference,Référence TNABF : canal 16 détresse et appel.
+Radiodiffusion Bande III,174.000,223.000,MHz,RADIODIFFUSION,reference,Référence TNABF : Bande III.
+Mobile / fixe 410-430 MHz,410.000,430.000,MHz,FIXE / MOBILE,reference,Référence TNABF : services fixe et mobile.
+IMT 700 MHz,694.000,790.000,MHz,MOBILE,reference,Bande de démonstration pour services mobiles.
+IMT 800 MHz,790.000,862.000,MHz,MOBILE,reference,Bande de démonstration pour services mobiles.
+Mobile 900 MHz,890.000,960.000,MHz,MOBILE,reference,Bande de démonstration pour services mobiles.
+IMT 2.6 GHz,2500.000,2690.000,MHz,MOBILE,reference,Bande de démonstration pour services mobiles.

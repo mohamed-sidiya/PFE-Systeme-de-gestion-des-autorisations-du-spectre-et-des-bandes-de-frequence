@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Bandes de fréquence</h2>
+  {% if current_user.has_role('Administrateur') %}<a class="btn btn-primary" href="{{ url_for('bandes.create') }}">Ajouter</a>{% endif %}
+</div>
+<table class="table table-striped">
+<thead><tr><th>Désignation</th><th>Début</th><th>Fin</th><th>Unité</th><th>Usage</th><th>Statut</th><th></th></tr></thead>
+<tbody>
+{% for b in bandes %}
+<tr>
+<td>{{ b.designation }}</td><td>{{ b.frequence_debut }}</td><td>{{ b.frequence_fin }}</td><td>{{ b.unite }}</td><td>{{ b.usage_service or '-' }}</td><td>{{ b.statut }}</td>
+<td>{% if current_user.has_role('Administrateur') %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('bandes.edit', bande_id=b.id) }}">Modifier</a>{% endif %}</td>
+</tr>
+{% endfor %}
+</tbody></table>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Agents</h2>
+  <a class="btn btn-primary" href="{{ url_for('admin.create_agent') }}">Créer un agent</a>
+</div>
+<table class="table table-striped">
+  <thead><tr><th>Nom</th><th>Email</th><th>Statut</th><th>Rôle verrouillé</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+  <tr><td>{{ u.nom }} {{ u.prenom or '' }}</td><td>{{ u.email }}</td><td>{{ u.statut_compte }}</td><td>{{ 'Oui' if u.role_locked else 'Non' }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

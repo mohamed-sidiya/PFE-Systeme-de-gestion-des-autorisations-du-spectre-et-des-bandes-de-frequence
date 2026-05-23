@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Créer un compte{% endblock %}
+{% block content %}
+<div class="card p-4">
+  <h3>Création d'un compte utilisateur</h3>
+  <p class="text-muted">Le rôle est fixé automatiquement à « Utilisateur ». Il ne pourra pas être modifié après création. Le compte doit ensuite être validé par l'administrateur.</p>
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="row">
+      <div class="col-md-4 mb-3">{{ form.nom.label(class="form-label") }}{{ form.nom(class="form-control") }}</div>
+      <div class="col-md-4 mb-3">{{ form.prenom.label(class="form-label") }}{{ form.prenom(class="form-control") }}</div>
+      <div class="col-md-4 mb-3">{{ form.email.label(class="form-label") }}{{ form.email(class="form-control") }}</div>
+      <div class="col-md-6 mb-3">{{ form.password.label(class="form-label") }}{{ form.password(class="form-control") }}</div>
+      <div class="col-md-6 mb-3">{{ form.confirm_password.label(class="form-label") }}{{ form.confirm_password(class="form-control") }}</div>
+      <div class="col-md-4 mb-3">{{ form.type_utilisateur.label(class="form-label") }}{{ form.type_utilisateur(class="form-select") }}</div>
+      <div class="col-md-8 mb-3">{{ form.raison_sociale.label(class="form-label") }}{{ form.raison_sociale(class="form-control") }}</div>
+      <div class="col-md-4 mb-3">{{ form.identifiant.label(class="form-label") }}{{ form.identifiant(class="form-control") }}</div>
+      <div class="col-md-4 mb-3">{{ form.telephone.label(class="form-label") }}{{ form.telephone(class="form-control") }}</div>
+      <div class="col-md-4 mb-3">{{ form.secteur_activite.label(class="form-label") }}{{ form.secteur_activite(class="form-control") }}</div>
+      <div class="col-12 mb-3">{{ form.adresse.label(class="form-label") }}{{ form.adresse(class="form-control") }}</div>
+    </div>
+    {{ form.submit(class="btn btn-success") }}
+  </form>
+</div>
+{% endblock %}

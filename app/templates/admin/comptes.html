@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Comptes utilisateurs</h2>
+<p class="text-muted">Le changement de rôle est interdit après création. L'administrateur peut seulement valider, refuser ou suspendre un compte.</p>
+<div class="mb-3">
+  <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin.comptes', statut='en_attente') }}">En attente</a>
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.comptes') }}">Tous</a>
+</div>
+<table class="table table-striped">
+  <thead><tr><th>Email</th><th>Rôle</th><th>Statut</th><th>Profil</th><th>Actions</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.email }}</td>
+      <td><span class="badge bg-dark">{{ u.role.nom }}</span></td>
+      <td>{{ u.statut_compte }}</td>
+      <td>{% if u.profil %}{{ u.profil.raison_sociale }}{% else %}-{% endif %}</td>
+      <td>
+        {% if u.statut_compte == 'en_attente' %}
+        <form class="d-inline" method="post" action="{{ url_for('admin.valider_compte', user_id=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-success btn-sm">Valider</button></form>
+        <form class="d-inline" method="post" action="{{ url_for('admin.refuser_compte', user_id=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-danger btn-sm">Refuser</button></form>
+        {% endif %}
+        {% if u.statut_compte == 'valide' and u.id != current_user.id %}
+        <form class="d-inline" method="post" action="{{ url_for('admin.suspendre_compte', user_id=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-warning btn-sm">Suspendre</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
