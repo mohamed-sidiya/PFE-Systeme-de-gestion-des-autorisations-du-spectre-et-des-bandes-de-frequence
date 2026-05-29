@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Facture {{ facture.numero_facture }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Facture {{ facture.numero_facture }}</h2>
+  <div>
+    <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('agent.detail_demande', demande_id=facture.demande.id) }}">Retour</a>
+    <button class="btn btn-primary btn-sm" onclick="window.print()">Imprimer</button>
+  </div>
+</div>
+
+<div class="card p-4 invoice-sheet">
+  <div class="row mb-4">
+    <div class="col-md-7">
+      <h4>Republique Islamique de Mauritanie</h4>
+      <p class="mb-1">Autorite de Regulation des Telecommunications</p>
+      <p class="mb-0">Avis de paiement / Redevance d'utilisation de frequences</p>
+    </div>
+    <div class="col-md-5 text-md-end">
+      <p class="mb-1"><strong>Date :</strong> {{ facture.date_creation.strftime('%d/%m/%Y') if facture.date_creation else '-' }}</p>
+      <p class="mb-1"><strong>Demande :</strong> {{ facture.demande.reference }}</p>
+      <p class="mb-0"><strong>Statut :</strong> {{ facture.statut }}</p>
+      {% if facture.date_paiement %}
+      <p class="mb-0"><strong>Paiement :</strong> {{ facture.date_paiement.strftime('%d/%m/%Y %H:%M') }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row border-top border-bottom py-3 mb-4">
+    <div class="col-md-6">
+      <h5>Redevable</h5>
+      <p class="mb-1">{{ facture.demande.utilisateur.profil.raison_sociale if facture.demande.utilisateur.profil else facture.demande.utilisateur.email }}</p>
+      <p class="mb-1">{{ facture.demande.utilisateur.email }}</p>
+      <p class="mb-0">{{ facture.demande.utilisateur.profil.adresse if facture.demande.utilisateur.profil and facture.demande.utilisateur.profil.adresse else '-' }}</p>
+    </div>
+    <div class="col-md-6">
+      <h5>Identification</h5>
+      <p class="mb-1"><strong>NIF / Identifiant :</strong> {{ facture.demande.utilisateur.profil.identifiant if facture.demande.utilisateur.profil and facture.demande.utilisateur.profil.identifiant else '-' }}</p>
+      <p class="mb-1"><strong>Bande :</strong> {{ facture.demande.bande.designation if facture.demande.bande else '-' }}</p>
+      <p class="mb-0"><strong>Periode :</strong> {{ facture.periode_mois }} mois</p>
+    </div>
+  </div>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Designation</th>
+        <th class="text-end">Periode</th>
+        <th class="text-end">Prix mensuel HT</th>
+        <th class="text-end">Montant HT</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>{{ facture.designation }}</td>
+        <td class="text-end">{{ facture.periode_mois }} mois</td>
+        <td class="text-end">{{ "%.2f"|format(facture.prix_unitaire) }} MRU</td>
+        <td class="text-end">{{ "%.2f"|format(facture.montant_ht) }} MRU</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="row justify-content-end">
+    <div class="col-md-5">
+      <table class="table table-sm">
+        <tr><th>Montant HT</th><td class="text-end">{{ "%.2f"|format(facture.montant_ht) }} MRU</td></tr>
+        <tr><th>TVA {{ "%.2f"|format(facture.taux_taxe) }}%</th><td class="text-end">{{ "%.2f"|format(facture.montant_taxe) }} MRU</td></tr>
+        <tr class="table-primary"><th>Total TTC</th><td class="text-end"><strong>{{ "%.2f"|format(facture.montant_ttc) }} MRU</strong></td></tr>
+      </table>
+    </div>
+  </div>
+
+  <p class="small text-muted mb-0">Facture generee par {{ facture.creee_par.email if facture.creee_par else '-' }}. Les montants sont fixes selon la bande, la puissance declaree et la duree demandee.</p>
+</div>
+{% endblock %}

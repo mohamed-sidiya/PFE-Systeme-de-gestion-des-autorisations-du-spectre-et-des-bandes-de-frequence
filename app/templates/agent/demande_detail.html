@@ -42,16 +42,29 @@
 <form class="d-inline" method="post" action="{{ url_for('agent.traiter', demande_id=demande.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-primary">Prendre en traitement</button></form>
 {% endif %}
 {% if demande.statut == 'en_traitement' %}
+{% if demande.facture %}
+<p class="mb-1"><strong>Facture :</strong> <a href="{{ url_for('agent.facture_detail', facture_id=demande.facture.id) }}">{{ demande.facture.numero_facture }}</a> - {{ "%.2f"|format(demande.facture.montant_ttc) }} MRU TTC</p>
+<p class="mb-3"><strong>Paiement :</strong> <span class="badge bg-{{ 'success' if demande.facture.statut == 'payee' else 'warning' }}">{{ demande.facture.statut }}</span></p>
+{% else %}
+<form class="mb-3" method="post" action="{{ url_for('agent.generer_facture', demande_id=demande.id) }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<button class="btn btn-info">Generer la facture</button>
+</form>
+{% endif %}
 <form class="mb-3 mt-3" method="post" action="{{ url_for('agent.demander_complement', demande_id=demande.id) }}">
 {{ complement_form.hidden_tag() }}
 {{ complement_form.motif(class="form-control mb-2", rows=2, placeholder="Motif du complement") }}
 {{ complement_form.submit(class="btn btn-warning") }}
 </form>
+{% if demande.facture and demande.facture.statut == 'payee' %}
 <form class="mb-3" method="post" action="{{ url_for('agent.valider', demande_id=demande.id) }}">
 {{ decision_form.hidden_tag() }}
 {{ decision_form.motif(class="form-control mb-2", rows=2, placeholder="Motif de validation") }}
 <button class="btn btn-success">Valider la demande</button>
 </form>
+{% else %}
+<button class="btn btn-success mb-3" disabled>Valider la demande</button>
+{% endif %}
 <form method="post" action="{{ url_for('agent.rejeter', demande_id=demande.id) }}">
 {{ decision_form.hidden_tag() }}
 {{ decision_form.motif(class="form-control mb-2", rows=2, placeholder="Motif du rejet") }}
@@ -59,6 +72,7 @@
 </form>
 {% endif %}
 {% if demande.statut == 'validee' and not demande.autorisation %}
+{% if demande.facture and demande.facture.statut == 'payee' %}
 <form class="mt-3" method="post" action="{{ url_for('agent.generer_autorisation', demande_id=demande.id) }}">
 {{ autorisation_form.hidden_tag() }}
 <div class="row">
@@ -67,6 +81,12 @@
 <div class="col-md-4 pt-4">{{ autorisation_form.submit(class="btn btn-success") }}</div>
 </div>
 </form>
+{% else %}
+<p class="text-muted mt-3">Le paiement doit etre enregistre avant de generer l'autorisation.</p>
+{% endif %}
+{% endif %}
+{% if demande.autorisation %}
+<a class="btn btn-outline-primary mt-3" href="{{ url_for('agent.autorisation_document', autorisation_id=demande.autorisation.id) }}">Voir l'autorisation</a>
 {% endif %}
 </div>
 

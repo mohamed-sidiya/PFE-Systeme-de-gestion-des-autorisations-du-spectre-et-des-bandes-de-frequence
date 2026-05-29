@@ -2,7 +2,7 @@
 {% block content %}
 <h2>Autorisations</h2>
 <table class="table table-striped">
-<thead><tr><th>Numéro</th><th>Demande</th><th>Utilisateur</th><th>Bande</th><th>Début</th><th>Fin</th><th>Statut</th></tr></thead>
+<thead><tr><th>Numero</th><th>Demande</th><th>Utilisateur</th><th>Bande</th><th>Debut</th><th>Fin</th><th>Statut</th><th>Document</th></tr></thead>
 <tbody>
 {% for a in autorisations %}
 <tr>
@@ -11,6 +11,7 @@
 <td>{{ a.demande.utilisateur.profil.raison_sociale if a.demande.utilisateur.profil else a.demande.utilisateur.email }}</td>
 <td>{{ a.bande.designation if a.bande else '-' }}</td>
 <td>{{ a.date_debut }}</td><td>{{ a.date_fin }}</td><td>{{ a.statut }}</td>
+<td>{% if current_user.has_role('Agent') %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('agent.autorisation_document', autorisation_id=a.id) }}">Voir</a>{% else %}-{% endif %}</td>
 </tr>
 {% endfor %}
 </tbody></table>

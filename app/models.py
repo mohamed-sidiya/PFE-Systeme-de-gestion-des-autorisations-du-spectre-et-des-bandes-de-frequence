@@ -168,7 +168,7 @@ class DemandeAutorisation(db.Model):
     unite = db.Column(db.String(20), default="MHz")
 
     zone_utilisation = db.Column(db.String(255), nullable=True)
-    puissance = db.Column(db.Numeric(10, 2), nullable=True)
+    puissance = db.Column(db.String(20), nullable=True)
 
     date_debut_souhaitee = db.Column(db.Date, nullable=True)
     date_fin_souhaitee = db.Column(db.Date, nullable=True)
@@ -186,6 +186,7 @@ class DemandeAutorisation(db.Model):
     observations = db.relationship("Observation", back_populates="demande", cascade="all, delete-orphan")
     decision = db.relationship("Decision", back_populates="demande", uselist=False, cascade="all, delete-orphan")
     autorisation = db.relationship("Autorisation", back_populates="demande", uselist=False, cascade="all, delete-orphan")
+    facture = db.relationship("Facture", back_populates="demande", uselist=False, cascade="all, delete-orphan")
     historiques = db.relationship("HistoriqueAction", back_populates="demande", cascade="all, delete-orphan")
 
     def changer_statut(self, nouveau_statut):
@@ -262,6 +263,30 @@ class Autorisation(db.Model):
 
     def est_expiree(self):
         return date.today() > self.date_fin
+
+
+class Facture(db.Model):
+    __tablename__ = "factures"
+    id = db.Column(db.Integer, primary_key=True)
+    numero_facture = db.Column(db.String(100), unique=True, nullable=False, index=True)
+    demande_id = db.Column(db.Integer, db.ForeignKey("demandes_autorisation.id"), unique=True, nullable=False)
+    creee_par_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+
+    designation = db.Column(db.String(255), nullable=False)
+    periode_mois = db.Column(db.Integer, nullable=False, default=1)
+    prix_unitaire = db.Column(db.Numeric(12, 2), nullable=False)
+    montant_ht = db.Column(db.Numeric(12, 2), nullable=False)
+    taux_taxe = db.Column(db.Numeric(5, 2), nullable=False, default=19)
+    montant_taxe = db.Column(db.Numeric(12, 2), nullable=False)
+    montant_ttc = db.Column(db.Numeric(12, 2), nullable=False)
+    statut = db.Column(db.String(50), nullable=False, default="generee")
+    date_paiement = db.Column(db.DateTime, nullable=True)
+    payee_par_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    date_creation = db.Column(db.DateTime, default=datetime.utcnow)
+
+    demande = db.relationship("DemandeAutorisation", back_populates="facture")
+    creee_par = db.relationship("User", foreign_keys=[creee_par_id])
+    payee_par = db.relationship("User", foreign_keys=[payee_par_id])
 
 
 class HistoriqueAction(db.Model):

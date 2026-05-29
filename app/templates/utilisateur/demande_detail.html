@@ -7,6 +7,9 @@
 <p><strong>Expose des motifs :</strong> {{ demande.objet }}</p>
 <p><strong>Service concerne :</strong> {{ demande.service_concerne or '-' }}</p>
 <p><strong>Statut :</strong> <span class="badge bg-primary">{{ demande.statut }}</span></p>
+{% if demande.autorisation %}
+<p><strong>Autorisation :</strong> <a href="{{ url_for('agent.autorisation_document', autorisation_id=demande.autorisation.id) }}">{{ demande.autorisation.numero_autorisation }}</a></p>
+{% endif %}
 </div>
 
 <div class="card p-4 mb-3">
@@ -16,6 +19,23 @@
 <p><strong>Puissance d'emission :</strong> {{ demande.puissance or '-' }}</p>
 <p><strong>Zone de couverture :</strong> {{ demande.zone_utilisation or '-' }}</p>
 </div>
+
+{% if demande.facture %}
+<div class="card p-4 mb-3">
+<h4>Facture</h4>
+<p><strong>Numero :</strong> {{ demande.facture.numero_facture }}</p>
+<p><strong>Montant TTC :</strong> {{ "%.2f"|format(demande.facture.montant_ttc) }} MRU</p>
+<p><strong>Statut :</strong> <span class="badge bg-{{ 'success' if demande.facture.statut == 'payee' else 'warning' }}">{{ demande.facture.statut }}</span></p>
+{% if demande.facture.statut != 'payee' %}
+<form method="post" action="{{ url_for('utilisateur.payer_facture', demande_id=demande.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-success">Payer</button>
+</form>
+{% else %}
+<p class="text-muted mb-0">Paiement enregistre le {{ demande.facture.date_paiement.strftime('%d/%m/%Y %H:%M') if demande.facture.date_paiement else '-' }}.</p>
+{% endif %}
+</div>
+{% endif %}
 
 <div class="card p-4 mb-3">
 <h4>Pieces jointes</h4>
@@ -28,7 +48,7 @@
 </ul>
 <form method="post" enctype="multipart/form-data" action="{{ url_for('utilisateur.ajouter_piece', demande_id=demande.id) }}">
   {{ piece_form.hidden_tag() }}
-  <div class="row"><div class="col-md-4">{{ piece_form.type_document(class="form-control", placeholder="Type document") }}</div><div class="col-md-5">{{ piece_form.fichier(class="form-control") }}</div><div class="col-md-3">{{ piece_form.submit(class="btn btn-primary") }}</div></div>
+  <div class="row"><div class="col-md-8">{{ piece_form.fichier(class="form-control") }}</div><div class="col-md-4">{{ piece_form.submit(class="btn btn-primary") }}</div></div>
 </form>
 </div>
 

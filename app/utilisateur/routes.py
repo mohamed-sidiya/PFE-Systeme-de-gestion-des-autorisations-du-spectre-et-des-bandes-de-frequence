@@ -106,7 +106,7 @@ def nouvelle_demande():
             frequence_max=form.frequence_max.data,
             unite=bande.unite if bande else form.unite.data,
             zone_utilisation=form.zone_utilisation.data,
-            puissance=form.puissance.data,
+            puissance=form.puissance.data or None,
             date_debut_souhaitee=form.date_debut_souhaitee.data,
             date_fin_souhaitee=form.date_fin_souhaitee.data,
             statut="soumise",
@@ -124,7 +124,7 @@ def nouvelle_demande():
         db.session.add(PieceJointe(
             demande_id=demande.id,
             ajoutee_par_id=current_user.id,
-            type_document="Dossier technique et administratif",
+            type_document="Document joint",
             **saved,
         ))
         log_action("Soumission demande", demande=demande, nouveau_statut="soumise")
@@ -170,6 +170,30 @@ def ajouter_piece(demande_id):
         log_action("Ajout piece jointe", demande=demande)
         db.session.commit()
         flash("Piece jointe ajoutee.", "success")
+    return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+
+
+@utilisateur_bp.route("/demandes/<int:demande_id>/payer", methods=["POST"])
+@role_required(ROLE_UTILISATEUR)
+@validated_account_required
+def payer_facture(demande_id):
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
+    if demande.utilisateur_id != current_user.id:
+        flash("Acces interdit.", "danger")
+        return redirect(url_for("utilisateur.demandes"))
+    if not demande.facture:
+        flash("Aucune facture n'a ete generee pour cette demande.", "warning")
+        return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+    if demande.facture.statut == "payee":
+        flash("Cette facture est deja payee.", "info")
+        return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+
+    demande.facture.statut = "payee"
+    demande.facture.date_paiement = datetime.utcnow()
+    demande.facture.payee_par_id = current_user.id
+    log_action("Paiement facture", demande=demande, entite="factures", entite_id=demande.facture.id)
+    db.session.commit()
+    flash("Paiement enregistre. L'agent peut maintenant generer l'autorisation.", "success")
     return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
 
 

@@ -17,7 +17,12 @@ class DemandeForm(FlaskForm):
     frequence_max = DecimalField("Frequence maximale", places=3, validators=[Optional()])
     unite = SelectField("Unite", choices=[("kHz", "kHz"), ("MHz", "MHz"), ("GHz", "GHz")], default="MHz")
     zone_utilisation = StringField("Zone de couverture / coordonnees", validators=[Optional(), Length(max=255)])
-    puissance = DecimalField("Puissance d'emission", places=2, validators=[Optional()])
+    puissance = SelectField("Puissance d'emission", choices=[
+        ("", "Non precisee"),
+        ("haute", "Haute"),
+        ("moyenne", "Moyenne"),
+        ("basse", "Basse"),
+    ], validators=[Optional()])
     date_debut_souhaitee = DateField("Date debut souhaitee", validators=[Optional()])
     date_fin_souhaitee = DateField("Date fin souhaitee", validators=[Optional()])
     document_requis = FileField("Dossier technique et administratif (PDF)", validators=[FileRequired(), FileAllowed(["pdf"], "Seuls les fichiers PDF sont autorises.")])
