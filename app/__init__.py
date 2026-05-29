@@ -2,10 +2,12 @@ from flask import Flask, redirect, url_for
 from .config import Config
 from .extensions import db, migrate, login_manager, csrf
 from .commands import seed_command, seed_bandes_command
+from .session import PortalSessionInterface
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True)
     app.config.from_object(config_class)
+    app.session_interface = PortalSessionInterface()
 
     db.init_app(app)
     migrate.init_app(app, db)

@@ -2,12 +2,38 @@
 {% block content %}
 <h2>Traitement de la demande {{ demande.reference }}</h2>
 <div class="card p-4 mb-3">
-<p><strong>Utilisateur :</strong> {{ demande.utilisateur.profil.raison_sociale if demande.utilisateur.profil else demande.utilisateur.email }}</p>
-<p><strong>Objet :</strong> {{ demande.objet }}</p>
+<h5>Identification du demandeur</h5>
+<p><strong>Raison sociale :</strong> {{ demande.utilisateur.profil.raison_sociale if demande.utilisateur.profil else demande.utilisateur.email }}</p>
+<p><strong>Representant :</strong> {{ demande.utilisateur.nom }} {{ demande.utilisateur.prenom or '' }} - {{ demande.utilisateur.email }}</p>
+<p><strong>Identifiant / NIF :</strong> {{ demande.utilisateur.profil.identifiant if demande.utilisateur.profil and demande.utilisateur.profil.identifiant else '-' }}</p>
+<p><strong>Adresse :</strong> {{ demande.utilisateur.profil.adresse if demande.utilisateur.profil and demande.utilisateur.profil.adresse else '-' }}</p>
+</div>
+
+<div class="card p-4 mb-3">
+<h5>Descriptif du projet</h5>
+<p><strong>Nature :</strong> {{ demande.type_demande or '-' }}</p>
+<p><strong>Expose des motifs :</strong> {{ demande.objet }}</p>
+<p><strong>Service concerne :</strong> {{ demande.service_concerne or '-' }}</p>
 <p><strong>Statut :</strong> <span class="badge bg-primary">{{ demande.statut }}</span></p>
+</div>
+
+<div class="card p-4 mb-3">
+<h5>Caracteristiques techniques et zone de couverture</h5>
 <p><strong>Bande :</strong> {{ demande.bande.designation if demande.bande else '-' }}</p>
-<p><strong>Fréquence :</strong> {{ demande.frequence_min or '-' }} - {{ demande.frequence_max or '-' }} {{ demande.unite }}</p>
-<p><strong>Description :</strong> {{ demande.description or '-' }}</p>
+<p><strong>Frequence :</strong> {{ demande.frequence_min or '-' }} - {{ demande.frequence_max or '-' }} {{ demande.unite }}</p>
+<p><strong>Puissance d'emission :</strong> {{ demande.puissance or '-' }}</p>
+<p><strong>Zone de couverture :</strong> {{ demande.zone_utilisation or '-' }}</p>
+</div>
+
+<div class="card p-4 mb-3">
+<h5>Equipements et schema d'installation</h5>
+<ul>
+{% for p in demande.pieces_jointes %}
+  <li><a href="{{ url_for('static', filename=p.chemin) }}" target="_blank" rel="noopener">{{ p.nom_original }}</a> - {{ p.type_document or '-' }}</li>
+{% else %}
+  <li>Aucune piece</li>
+{% endfor %}
+</ul>
 </div>
 
 <div class="card p-4 mb-3">
@@ -18,7 +44,7 @@
 {% if demande.statut == 'en_traitement' %}
 <form class="mb-3 mt-3" method="post" action="{{ url_for('agent.demander_complement', demande_id=demande.id) }}">
 {{ complement_form.hidden_tag() }}
-{{ complement_form.motif(class="form-control mb-2", rows=2, placeholder="Motif du complément") }}
+{{ complement_form.motif(class="form-control mb-2", rows=2, placeholder="Motif du complement") }}
 {{ complement_form.submit(class="btn btn-warning") }}
 </form>
 <form class="mb-3" method="post" action="{{ url_for('agent.valider', demande_id=demande.id) }}">
@@ -54,10 +80,7 @@
 </div>
 
 <div class="card p-4">
-<h4>Pièces et observations</h4>
-<h6>Pièces</h6>
-<ul>{% for p in demande.pieces_jointes %}<li>{{ p.nom_original }} — {{ p.type_document or '-' }}</li>{% else %}<li>Aucune pièce</li>{% endfor %}</ul>
-<h6>Observations</h6>
-<ul>{% for o in demande.observations %}<li><strong>{{ o.type_observation }}</strong> — {{ o.contenu }}</li>{% else %}<li>Aucune observation</li>{% endfor %}</ul>
+<h4>Observations</h4>
+<ul>{% for o in demande.observations %}<li><strong>{{ o.type_observation }}</strong> - {{ o.contenu }}</li>{% else %}<li>Aucune observation</li>{% endfor %}</ul>
 </div>
 {% endblock %}

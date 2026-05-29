@@ -10,10 +10,14 @@
 <body>
 <header class="institutional-header">
   <div class="container-fluid header-content">
-    {% if current_user.is_authenticated %}
-      {% set brand_href = url_for('dashboard.index') %}
-    {% elif request.endpoint == 'auth.login_interne' %}
-      {% set brand_href = url_for('auth.login_interne') %}
+    {% if current_user.is_authenticated and current_user.has_role('Administrateur') %}
+      {% set brand_href = url_for('admin.comptes') %}
+    {% elif current_user.is_authenticated and current_user.has_role('Agent') %}
+      {% set brand_href = url_for('agent.dashboard') %}
+    {% elif current_user.is_authenticated and current_user.has_role('Utilisateur') %}
+      {% set brand_href = url_for('utilisateur.dashboard') %}
+    {% elif request.endpoint in ['auth.login_interne', 'auth.login_admin', 'auth.login_agent'] %}
+      {% set brand_href = url_for('auth.login_admin') %}
     {% elif request.endpoint in ['auth.login_utilisateur', 'auth.register'] %}
       {% set brand_href = url_for('auth.login_utilisateur') %}
     {% else %}
@@ -39,31 +43,39 @@
           {% if current_user.has_role('Administrateur') %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.comptes') }}">Comptes</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.agents') }}">Agents</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('bandes.index') }}">Bandes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('bandes.index', portal='admin') }}">Bandes</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin.journaux') }}">Journaux</a></li>
           {% elif current_user.has_role('Agent') %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('agent.demandes') }}">Demandes</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('bandes.index') }}">Bandes</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('autorisations.index') }}">Autorisations</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('bandes.index', portal='agent') }}">Bandes</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('autorisations.index', portal='agent') }}">Autorisations</a></li>
           {% elif current_user.has_role('Utilisateur') %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('utilisateur.demandes') }}">Mes demandes</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('utilisateur.nouvelle_demande') }}">Nouvelle demande</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('autorisations.index') }}">Mes autorisations</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('autorisations.index', portal='utilisateur') }}">Mes autorisations</a></li>
           {% endif %}
         {% endif %}
       </ul>
       <ul class="navbar-nav align-items-lg-center">
         {% if current_user.is_authenticated %}
           <li class="nav-item"><span class="navbar-text me-3 small">{{ current_user.email }} - {{ current_user.role.nom }}</span></li>
-          <li class="nav-item"><a class="btn btn-outline-primary btn-sm" href="{{ url_for('auth.logout') }}">Deconnexion</a></li>
-        {% elif request.endpoint == 'auth.login_interne' %}
+          {% if current_user.has_role('Administrateur') %}
+            {% set logout_href = url_for('auth.logout_admin') %}
+          {% elif current_user.has_role('Agent') %}
+            {% set logout_href = url_for('auth.logout_agent') %}
+          {% else %}
+            {% set logout_href = url_for('auth.logout_utilisateur') %}
+          {% endif %}
+          <li class="nav-item"><a class="btn btn-outline-primary btn-sm" href="{{ logout_href }}">Deconnexion</a></li>
+        {% elif request.endpoint in ['auth.login_interne', 'auth.login_admin', 'auth.login_agent'] %}
           <li class="nav-item"><span class="navbar-text small">Espace interne</span></li>
         {% elif request.endpoint in ['auth.login_utilisateur', 'auth.register'] %}
           <li class="nav-item me-lg-2"><a class="nav-link" href="{{ url_for('auth.login_utilisateur') }}">Espace utilisateur</a></li>
           <li class="nav-item"><a class="btn btn-primary btn-sm" href="{{ url_for('auth.register') }}">Creer un compte</a></li>
         {% else %}
           <li class="nav-item me-lg-2"><a class="nav-link" href="{{ url_for('auth.login_utilisateur') }}">Espace utilisateur</a></li>
-          <li class="nav-item me-lg-2"><a class="nav-link" href="{{ url_for('auth.login_interne') }}">Admin / Agent</a></li>
+          <li class="nav-item me-lg-2"><a class="nav-link" href="{{ url_for('auth.login_admin') }}">Admin</a></li>
+          <li class="nav-item me-lg-2"><a class="nav-link" href="{{ url_for('auth.login_agent') }}">Agent</a></li>
           <li class="nav-item"><a class="btn btn-primary btn-sm" href="{{ url_for('auth.register') }}">Creer un compte</a></li>
         {% endif %}
       </ul>

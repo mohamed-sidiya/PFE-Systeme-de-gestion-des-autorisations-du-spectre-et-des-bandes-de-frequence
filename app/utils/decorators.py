@@ -8,12 +8,14 @@ def role_required(*role_names):
         @wraps(view_func)
         def wrapped(*args, **kwargs):
             if not current_user.is_authenticated:
-                internal_roles = {ROLE_ADMIN, ROLE_AGENT}
-                login_endpoint = (
-                    "auth.login_interne"
-                    if internal_roles.intersection(role_names)
-                    else "auth.login_utilisateur"
-                )
+                if ROLE_ADMIN in role_names and ROLE_AGENT not in role_names:
+                    login_endpoint = "auth.login_admin"
+                elif ROLE_AGENT in role_names and ROLE_ADMIN not in role_names:
+                    login_endpoint = "auth.login_agent"
+                elif ROLE_ADMIN in role_names or ROLE_AGENT in role_names:
+                    login_endpoint = "auth.login_admin"
+                else:
+                    login_endpoint = "auth.login_utilisateur"
                 return redirect(url_for(login_endpoint))
             if not current_user.has_role(*role_names):
                 abort(403)

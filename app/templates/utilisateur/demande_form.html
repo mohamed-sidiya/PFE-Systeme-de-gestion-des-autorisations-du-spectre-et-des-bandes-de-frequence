@@ -2,23 +2,122 @@
 {% block content %}
 <div class="card p-4">
 <h2>Nouvelle demande d'autorisation</h2>
-<form method="post">
+<div class="border rounded p-3 mb-4 bg-light">
+  <h5 class="mb-2">Dossier technique et administratif</h5>
+  <p class="text-muted small mb-2">Constituez le dossier directement sur cette page, puis joignez le PDF complet avant de soumettre la demande.</p>
+  <ul class="small mb-0">
+    <li>Identification du demandeur : raison sociale, adresse, representant legal et identifiant/NIF.</li>
+    <li>Descriptif du projet : nature de l'utilisation et expose des motifs.</li>
+    <li>Caracteristiques techniques : bande sollicitee, frequences, puissance et service concerne.</li>
+    <li>Equipements : references, marques, modeles et preuves de conformite.</li>
+    <li>Zone de couverture : coordonnees geographiques, stations et portee souhaitee.</li>
+    <li>Schema d'installation : plan du reseau et diagramme de rayonnement des antennes.</li>
+  </ul>
+</div>
+<form method="post" enctype="multipart/form-data">
 {{ form.hidden_tag() }}
+
+<h5 class="mt-2">Identification du demandeur</h5>
+<dl class="row mb-3">
+  <dt class="col-md-3">Raison sociale</dt>
+  <dd class="col-md-9">{{ current_user.profil.raison_sociale if current_user.profil else current_user.email }}</dd>
+  <dt class="col-md-3">Representant</dt>
+  <dd class="col-md-9">{{ current_user.nom }} {{ current_user.prenom or '' }} - {{ current_user.email }}</dd>
+  <dt class="col-md-3">Identifiant / NIF</dt>
+  <dd class="col-md-9">{{ current_user.profil.identifiant if current_user.profil and current_user.profil.identifiant else '-' }}</dd>
+  <dt class="col-md-3">Adresse</dt>
+  <dd class="col-md-9">{{ current_user.profil.adresse if current_user.profil and current_user.profil.adresse else '-' }}</dd>
+</dl>
+
+<h5>Descriptif du projet</h5>
 <div class="row">
   <div class="col-md-6 mb-3">{{ form.objet.label(class="form-label") }}{{ form.objet(class="form-control") }}</div>
   <div class="col-md-3 mb-3">{{ form.type_demande.label(class="form-label") }}{{ form.type_demande(class="form-select") }}</div>
+  <div class="col-md-3 mb-3">{{ form.service_concerne.label(class="form-label") }}{{ form.service_concerne(class="form-control") }}</div>
+</div>
+
+<h5>Caracteristiques techniques</h5>
+<div class="row">
   <div class="col-md-3 mb-3">{{ form.bande_id.label(class="form-label") }}{{ form.bande_id(class="form-select") }}</div>
-  <div class="col-md-4 mb-3">{{ form.service_concerne.label(class="form-label") }}{{ form.service_concerne(class="form-control") }}</div>
-  <div class="col-md-2 mb-3">{{ form.frequence_min.label(class="form-label") }}{{ form.frequence_min(class="form-control") }}</div>
-  <div class="col-md-2 mb-3">{{ form.frequence_max.label(class="form-label") }}{{ form.frequence_max(class="form-control") }}</div>
+  <div class="col-md-2 mb-3">
+    {{ form.frequence_min.label(class="form-label") }}
+    {{ form.frequence_min(class="form-control", step="0.001") }}
+    {% for error in form.frequence_min.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+  </div>
+  <div class="col-md-2 mb-3">
+    {{ form.frequence_max.label(class="form-label") }}
+    {{ form.frequence_max(class="form-control", step="0.001") }}
+    {% for error in form.frequence_max.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+  </div>
   <div class="col-md-2 mb-3">{{ form.unite.label(class="form-label") }}{{ form.unite(class="form-select") }}</div>
-  <div class="col-md-2 mb-3">{{ form.puissance.label(class="form-label") }}{{ form.puissance(class="form-control") }}</div>
+  <div class="col-md-3 mb-3">{{ form.puissance.label(class="form-label") }}{{ form.puissance(class="form-control") }}</div>
+</div>
+
+<h5>Zone de couverture</h5>
+<div class="row">
   <div class="col-md-4 mb-3">{{ form.zone_utilisation.label(class="form-label") }}{{ form.zone_utilisation(class="form-control") }}</div>
   <div class="col-md-4 mb-3">{{ form.date_debut_souhaitee.label(class="form-label") }}{{ form.date_debut_souhaitee(class="form-control") }}</div>
   <div class="col-md-4 mb-3">{{ form.date_fin_souhaitee.label(class="form-label") }}{{ form.date_fin_souhaitee(class="form-control") }}</div>
-  <div class="col-12 mb-3">{{ form.description.label(class="form-label") }}{{ form.description(class="form-control", rows=4) }}</div>
 </div>
+
+<h5>Document du dossier</h5>
+<p class="text-muted small">Joignez ici le PDF du dossier technique et administratif contenant les equipements, les preuves de conformite, le schema d'installation et les elements complementaires.</p>
+<div class="mb-3">
+  {{ form.document_requis.label(class="form-label") }}
+  {{ form.document_requis(class="form-control", accept="application/pdf,.pdf") }}
+  {% for error in form.document_requis.errors %}<div class="text-danger small">{{ error }}</div>{% endfor %}
+</div>
+
 {{ form.submit(class="btn btn-success") }}
 </form>
 </div>
+
+<script>
+const bandeLimits = {{ bande_limits|tojson }};
+const bandeSelect = document.getElementById("bande_id");
+const minInput = document.getElementById("frequence_min");
+const maxInput = document.getElementById("frequence_max");
+const unitSelect = document.getElementById("unite");
+
+function applyRangeAttributes(selected) {
+  for (const input of [minInput, maxInput]) {
+    input.min = selected.min;
+    input.max = selected.max;
+  }
+  minInput.placeholder = `Min ${selected.min}`;
+  maxInput.placeholder = `Max ${selected.max}`;
+}
+
+function clampToBande(input, selected) {
+  if (!input.value) return;
+  const value = Number(input.value);
+  const min = Number(selected.min);
+  const max = Number(selected.max);
+  if (value < min) input.value = selected.min;
+  if (value > max) input.value = selected.max;
+}
+
+function applyBandeLimits() {
+  const selected = bandeLimits.find((item) => String(item.id) === bandeSelect.value);
+  if (!selected) {
+    for (const input of [minInput, maxInput]) {
+      input.removeAttribute("min");
+      input.removeAttribute("max");
+    }
+    unitSelect.disabled = false;
+    return;
+  }
+
+  applyRangeAttributes(selected);
+  unitSelect.value = selected.unite;
+  unitSelect.disabled = true;
+  clampToBande(minInput, selected);
+  clampToBande(maxInput, selected);
+}
+
+bandeSelect.addEventListener("change", applyBandeLimits);
+minInput.addEventListener("change", applyBandeLimits);
+maxInput.addEventListener("change", applyBandeLimits);
+applyBandeLimits();
+</script>
 {% endblock %}
