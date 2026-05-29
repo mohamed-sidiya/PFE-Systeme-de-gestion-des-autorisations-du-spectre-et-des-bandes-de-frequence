@@ -67,7 +67,13 @@ class User(UserMixin, db.Model):
     derniere_connexion = db.Column(db.DateTime, nullable=True)
 
     role = db.relationship("Role", foreign_keys=[role_id])
-    profil = db.relationship("ProfilUtilisateur", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    profil = db.relationship(
+        "ProfilUtilisateur",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan",
+        foreign_keys="ProfilUtilisateur.user_id",
+    )
 
     demandes = db.relationship(
         "DemandeAutorisation",
@@ -115,11 +121,15 @@ class ProfilUtilisateur(db.Model):
     type_utilisateur = db.Column(db.String(50), nullable=False, default="entreprise")
     raison_sociale = db.Column(db.String(255), nullable=False)
     identifiant = db.Column(db.String(100), nullable=True)
+    nif_verifie = db.Column(db.Boolean, nullable=False, default=False)
+    nif_verifie_par_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=True)
+    date_verification_nif = db.Column(db.DateTime, nullable=True)
     telephone = db.Column(db.String(50), nullable=True)
     adresse = db.Column(db.String(255), nullable=True)
     secteur_activite = db.Column(db.String(150), nullable=True)
 
-    user = db.relationship("User", back_populates="profil")
+    user = db.relationship("User", back_populates="profil", foreign_keys=[user_id])
+    nif_verifie_par = db.relationship("User", foreign_keys=[nif_verifie_par_id])
 
     def __repr__(self):
         return f"<ProfilUtilisateur {self.raison_sociale}>"

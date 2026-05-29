@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Détails du compte</h2>
+  <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.comptes') }}">Retour</a>
+</div>
+
+<div class="card p-4 mb-3">
+  <h4 class="mb-3">Informations utilisateur</h4>
+  <dl class="row mb-0">
+    <dt class="col-md-3">Nom</dt>
+    <dd class="col-md-9">{{ user.nom }}</dd>
+
+    <dt class="col-md-3">Prénom</dt>
+    <dd class="col-md-9">{{ user.prenom or '-' }}</dd>
+
+    <dt class="col-md-3">Email</dt>
+    <dd class="col-md-9">{{ user.email }}</dd>
+
+    <dt class="col-md-3">Rôle</dt>
+    <dd class="col-md-9"><span class="badge bg-dark">{{ user.role.nom }}</span></dd>
+
+    <dt class="col-md-3">Statut</dt>
+    <dd class="col-md-9">{{ user.statut_compte }}</dd>
+
+    <dt class="col-md-3">Date de création</dt>
+    <dd class="col-md-9">{{ user.date_creation.strftime('%d/%m/%Y %H:%M') if user.date_creation else '-' }}</dd>
+
+    <dt class="col-md-3">Date de validation</dt>
+    <dd class="col-md-9">{{ user.date_validation.strftime('%d/%m/%Y %H:%M') if user.date_validation else '-' }}</dd>
+
+    <dt class="col-md-3">Validé par</dt>
+    <dd class="col-md-9">{{ user.valide_par.email if user.valide_par else '-' }}</dd>
+  </dl>
+</div>
+
+<div class="card p-4 mb-3">
+  <h4 class="mb-3">Profil</h4>
+  {% if user.profil %}
+  <dl class="row mb-0">
+    <dt class="col-md-3">Type</dt>
+    <dd class="col-md-9">{{ user.profil.type_utilisateur }}</dd>
+
+    <dt class="col-md-3">Raison sociale</dt>
+    <dd class="col-md-9">{{ user.profil.raison_sociale }}</dd>
+
+    <dt class="col-md-3">NIF / identifiant</dt>
+    <dd class="col-md-9">
+      {{ user.profil.identifiant or '-' }}
+      {% if user.profil.nif_verifie %}
+        <span class="badge bg-success ms-2">Verifie</span>
+      {% else %}
+        <span class="badge bg-secondary ms-2">Non verifie</span>
+      {% endif %}
+    </dd>
+
+    <dt class="col-md-3">Verification NIF</dt>
+    <dd class="col-md-9">
+      {% if user.profil.nif_verifie %}
+        {{ user.profil.date_verification_nif.strftime('%d/%m/%Y %H:%M') if user.profil.date_verification_nif else '-' }}
+        {% if user.profil.nif_verifie_par %}
+          par {{ user.profil.nif_verifie_par.email }}
+        {% endif %}
+      {% else %}
+        -
+      {% endif %}
+    </dd>
+
+    <dt class="col-md-3">Téléphone</dt>
+    <dd class="col-md-9">{{ user.profil.telephone or '-' }}</dd>
+
+    <dt class="col-md-3">Secteur d'activité</dt>
+    <dd class="col-md-9">{{ user.profil.secteur_activite or '-' }}</dd>
+
+    <dt class="col-md-3">Adresse</dt>
+    <dd class="col-md-9">{{ user.profil.adresse or '-' }}</dd>
+  </dl>
+  <div class="d-flex gap-2 mt-3">
+    {% if user.profil.identifiant and not user.profil.nif_verifie %}
+    <form method="post" action="{{ url_for('admin.verifier_nif', user_id=user.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-success btn-sm">Verifier le NIF</button>
+    </form>
+    {% elif user.profil.nif_verifie %}
+    <form method="post" action="{{ url_for('admin.annuler_verification_nif', user_id=user.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-outline-secondary btn-sm">Annuler la verification NIF</button>
+    </form>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="text-muted mb-0">Aucun profil associé.</p>
+  {% endif %}
+</div>
+
+{% if user.statut_compte == 'en_attente' %}
+<div class="d-flex gap-2">
+  <form method="post" action="{{ url_for('admin.valider_compte', user_id=user.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-success">Valider</button>
+  </form>
+  <form method="post" action="{{ url_for('admin.refuser_compte', user_id=user.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button class="btn btn-danger">Refuser</button>
+  </form>
+</div>
+{% elif user.statut_compte == 'valide' and user.id != current_user.id %}
+<form method="post" action="{{ url_for('admin.suspendre_compte', user_id=user.id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <button class="btn btn-warning">Suspendre</button>
+</form>
+{% endif %}
+{% endblock %}

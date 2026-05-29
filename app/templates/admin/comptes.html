@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 {% block content %}
 <h2>Comptes utilisateurs</h2>
-<p class="text-muted">Le changement de rôle est interdit après création. L'administrateur peut seulement valider, refuser ou suspendre un compte.</p>
+<p class="text-muted">Le changement de role est interdit apres creation. L'administrateur peut seulement valider, refuser, suspendre un compte ou verifier son NIF.</p>
 <div class="mb-3">
   <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin.comptes', statut='en_attente') }}">En attente</a>
+  <a class="btn btn-outline-success btn-sm" href="{{ url_for('admin.comptes', statut='valide') }}">Valides</a>
   <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.comptes') }}">Tous</a>
 </div>
 <table class="table table-striped">
-  <thead><tr><th>Email</th><th>Rôle</th><th>Statut</th><th>Profil</th><th>Actions</th></tr></thead>
+  <thead><tr><th>Email</th><th>Role</th><th>Statut</th><th>Profil</th><th>NIF</th><th>Actions</th></tr></thead>
   <tbody>
   {% for u in users %}
     <tr>
@@ -16,6 +17,22 @@
       <td>{{ u.statut_compte }}</td>
       <td>{% if u.profil %}{{ u.profil.raison_sociale }}{% else %}-{% endif %}</td>
       <td>
+        {% if u.profil and u.profil.identifiant %}
+          {{ u.profil.identifiant }}
+          {% if u.profil.nif_verifie %}
+            <span class="badge bg-success">Verifie</span>
+          {% else %}
+            <span class="badge bg-secondary">Non verifie</span>
+          {% endif %}
+        {% else %}
+          -
+        {% endif %}
+      </td>
+      <td>
+        <a class="btn btn-outline-primary btn-sm" href="{{ url_for('admin.compte_detail', user_id=u.id) }}">Details</a>
+        {% if u.profil and u.profil.identifiant and not u.profil.nif_verifie %}
+        <form class="d-inline" method="post" action="{{ url_for('admin.verifier_nif', user_id=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-outline-success btn-sm">Verifier NIF</button></form>
+        {% endif %}
         {% if u.statut_compte == 'en_attente' %}
         <form class="d-inline" method="post" action="{{ url_for('admin.valider_compte', user_id=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-success btn-sm">Valider</button></form>
         <form class="d-inline" method="post" action="{{ url_for('admin.refuser_compte', user_id=u.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="btn btn-danger btn-sm">Refuser</button></form>

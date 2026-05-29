@@ -27,6 +27,12 @@ def comptes():
     users = db.session.scalars(query).all()
     return render_template("admin/comptes.html", users=users, statut=statut)
 
+@admin_bp.route("/comptes/<int:user_id>")
+@role_required(ROLE_ADMIN)
+def compte_detail(user_id):
+    user = db.get_or_404(User, user_id)
+    return render_template("admin/compte_detail.html", user=user)
+
 @admin_bp.route("/comptes/<int:user_id>/valider", methods=["POST"])
 @role_required(ROLE_ADMIN)
 def valider_compte(user_id):
@@ -37,7 +43,42 @@ def valider_compte(user_id):
     log_action("Validation compte utilisateur", entite="users", entite_id=user.id)
     db.session.commit()
     flash("Compte validé. Le rôle n'a pas été modifié.", "success")
-    return redirect(url_for("admin.comptes", statut=STATUT_COMPTE_ATTENTE))
+    return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+@admin_bp.route("/comptes/<int:user_id>/verifier-nif", methods=["POST"])
+@role_required(ROLE_ADMIN)
+def verifier_nif(user_id):
+    user = db.get_or_404(User, user_id)
+    if not user.profil:
+        flash("Aucun profil utilisateur a verifier.", "warning")
+        return redirect(url_for("admin.compte_detail", user_id=user.id))
+    if not user.profil.identifiant:
+        flash("Aucun NIF n'a ete renseigne pour ce compte.", "warning")
+        return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+    user.profil.nif_verifie = True
+    user.profil.date_verification_nif = datetime.utcnow()
+    user.profil.nif_verifie_par_id = current_user.id
+    log_action("Verification NIF", entite="profils_utilisateurs", entite_id=user.profil.id)
+    db.session.commit()
+    flash("NIF verifie.", "success")
+    return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+@admin_bp.route("/comptes/<int:user_id>/annuler-verification-nif", methods=["POST"])
+@role_required(ROLE_ADMIN)
+def annuler_verification_nif(user_id):
+    user = db.get_or_404(User, user_id)
+    if not user.profil:
+        flash("Aucun profil utilisateur a verifier.", "warning")
+        return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+    user.profil.nif_verifie = False
+    user.profil.date_verification_nif = None
+    user.profil.nif_verifie_par_id = None
+    log_action("Annulation verification NIF", entite="profils_utilisateurs", entite_id=user.profil.id)
+    db.session.commit()
+    flash("Verification du NIF annulee.", "info")
+    return redirect(url_for("admin.compte_detail", user_id=user.id))
 
 @admin_bp.route("/comptes/<int:user_id>/refuser", methods=["POST"])
 @role_required(ROLE_ADMIN)
@@ -47,7 +88,7 @@ def refuser_compte(user_id):
     log_action("Refus compte utilisateur", entite="users", entite_id=user.id)
     db.session.commit()
     flash("Compte refusé.", "info")
-    return redirect(url_for("admin.comptes", statut=STATUT_COMPTE_ATTENTE))
+    return redirect(url_for("admin.compte_detail", user_id=user.id))
 
 @admin_bp.route("/comptes/<int:user_id>/suspendre", methods=["POST"])
 @role_required(ROLE_ADMIN)
