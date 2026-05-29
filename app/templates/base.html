@@ -17,7 +17,7 @@
     {% elif request.endpoint in ['auth.login_utilisateur', 'auth.register'] %}
       {% set brand_href = url_for('auth.login_utilisateur') %}
     {% else %}
-      {% set brand_href = url_for('auth.choix_connexion') %}
+      {% set brand_href = url_for('auth.login_utilisateur') %}
     {% endif %}
     <a class="brand-zone" href="{{ brand_href }}">
       <img src="{{ url_for('static', filename='img/logo_autorite_regulation.png') }}" alt="Autorite de Regulation" class="logo-ar">

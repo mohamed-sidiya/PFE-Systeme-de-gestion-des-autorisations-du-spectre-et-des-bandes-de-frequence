@@ -52,12 +52,9 @@ def _authenticate(form, allowed_roles, template_name, portal_name):
     return _redirect_authenticated_user()
 
 
-@auth_bp.route("/")
 @auth_bp.route("/connexion")
-def choix_connexion():
-    if current_user.is_authenticated:
-        return _redirect_authenticated_user()
-    return render_template("auth/choix_connexion.html")
+def connexion():
+    return redirect(url_for("auth.login_utilisateur"))
 
 
 @auth_bp.route("/register", methods=["GET", "POST"])
@@ -137,4 +134,4 @@ def login_interne():
 def logout():
     logout_user()
     flash("Vous êtes déconnecté.", "info")
-    return redirect(url_for("auth.choix_connexion"))
+    return redirect(url_for("auth.login_utilisateur"))

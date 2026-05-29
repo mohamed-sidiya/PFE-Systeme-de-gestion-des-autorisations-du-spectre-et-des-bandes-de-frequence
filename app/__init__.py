@@ -36,6 +36,6 @@ def create_app(config_class=Config):
 
     @app.route("/")
     def index():
-        return redirect(url_for("auth.choix_connexion"))
+        return redirect(url_for("auth.login_utilisateur"))
 
     return app
