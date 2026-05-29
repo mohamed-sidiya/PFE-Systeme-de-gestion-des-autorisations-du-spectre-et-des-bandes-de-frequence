@@ -1,5 +1,5 @@
 from datetime import datetime
-from flask import Blueprint, render_template, redirect, url_for, flash
+from flask import Blueprint, render_template, redirect, url_for, flash, send_file
 from flask_login import current_user
 from sqlalchemy import select
 
@@ -10,6 +10,7 @@ from app.utils.decorators import role_required, validated_account_required
 from app.utils.references import generate_demande_reference
 from app.utils.audit import log_action
 from app.utils.files import save_upload
+from app.utils.pdf import build_facture_pdf, build_autorisation_pdf
 from .forms import DemandeForm, PieceForm, ComplementForm
 
 utilisateur_bp = Blueprint("utilisateur", __name__, url_prefix="/utilisateur")
@@ -195,6 +196,48 @@ def payer_facture(demande_id):
     db.session.commit()
     flash("Paiement enregistre. L'agent peut maintenant generer l'autorisation.", "success")
     return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+
+
+@utilisateur_bp.route("/demandes/<int:demande_id>/facture.pdf")
+@role_required(ROLE_UTILISATEUR)
+@validated_account_required
+def facture_pdf(demande_id):
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
+    if demande.utilisateur_id != current_user.id:
+        flash("Acces interdit.", "danger")
+        return redirect(url_for("utilisateur.demandes"))
+    if not demande.facture:
+        flash("Aucune facture n'a ete generee pour cette demande.", "warning")
+        return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+
+    pdf = build_facture_pdf(demande.facture)
+    return send_file(
+        pdf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"{demande.facture.numero_facture}.pdf",
+    )
+
+
+@utilisateur_bp.route("/demandes/<int:demande_id>/autorisation.pdf")
+@role_required(ROLE_UTILISATEUR)
+@validated_account_required
+def autorisation_pdf(demande_id):
+    demande = db.get_or_404(DemandeAutorisation, demande_id)
+    if demande.utilisateur_id != current_user.id:
+        flash("Acces interdit.", "danger")
+        return redirect(url_for("utilisateur.demandes"))
+    if not demande.autorisation:
+        flash("Aucune autorisation n'a ete generee pour cette demande.", "warning")
+        return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+
+    pdf = build_autorisation_pdf(demande.autorisation)
+    return send_file(
+        pdf,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"{demande.autorisation.numero_autorisation}.pdf",
+    )
 
 
 @utilisateur_bp.route("/demandes/<int:demande_id>/completer", methods=["POST"])

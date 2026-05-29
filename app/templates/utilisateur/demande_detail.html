@@ -9,6 +9,7 @@
 <p><strong>Statut :</strong> <span class="badge bg-primary">{{ demande.statut }}</span></p>
 {% if demande.autorisation %}
 <p><strong>Autorisation :</strong> <a href="{{ url_for('agent.autorisation_document', autorisation_id=demande.autorisation.id) }}">{{ demande.autorisation.numero_autorisation }}</a></p>
+<a class="btn btn-outline-primary btn-sm" href="{{ url_for('utilisateur.autorisation_pdf', demande_id=demande.id) }}">Telecharger l'autorisation PDF</a>
 {% endif %}
 </div>
 
@@ -26,6 +27,7 @@
 <p><strong>Numero :</strong> {{ demande.facture.numero_facture }}</p>
 <p><strong>Montant TTC :</strong> {{ "%.2f"|format(demande.facture.montant_ttc) }} MRU</p>
 <p><strong>Statut :</strong> <span class="badge bg-{{ 'success' if demande.facture.statut == 'payee' else 'warning' }}">{{ demande.facture.statut }}</span></p>
+<a class="btn btn-outline-primary btn-sm mb-3" href="{{ url_for('utilisateur.facture_pdf', demande_id=demande.id) }}">Telecharger la facture PDF</a>
 {% if demande.facture.statut != 'payee' %}
 <form method="post" action="{{ url_for('utilisateur.payer_facture', demande_id=demande.id) }}">
   <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -37,6 +39,7 @@
 </div>
 {% endif %}
 
+{% if not demande.autorisation %}
 <div class="card p-4 mb-3">
 <h4>Pieces jointes</h4>
 <ul>
@@ -46,11 +49,8 @@
   <li>Aucune piece</li>
 {% endfor %}
 </ul>
-<form method="post" enctype="multipart/form-data" action="{{ url_for('utilisateur.ajouter_piece', demande_id=demande.id) }}">
-  {{ piece_form.hidden_tag() }}
-  <div class="row"><div class="col-md-8">{{ piece_form.fichier(class="form-control") }}</div><div class="col-md-4">{{ piece_form.submit(class="btn btn-primary") }}</div></div>
-</form>
 </div>
+{% endif %}
 
 {% if demande.statut == 'complement_demande' %}
 <div class="card p-4 mb-3">
