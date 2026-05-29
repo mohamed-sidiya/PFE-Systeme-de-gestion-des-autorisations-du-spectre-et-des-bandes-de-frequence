@@ -11,7 +11,15 @@
 <td>{{ a.demande.utilisateur.profil.raison_sociale if a.demande.utilisateur.profil else a.demande.utilisateur.email }}</td>
 <td>{{ a.bande.designation if a.bande else '-' }}</td>
 <td>{{ a.date_debut }}</td><td>{{ a.date_fin }}</td><td>{{ a.statut }}</td>
-<td>{% if current_user.has_role('Agent') %}<a class="btn btn-sm btn-outline-primary" href="{{ url_for('agent.autorisation_document', autorisation_id=a.id) }}">Voir</a>{% else %}-{% endif %}</td>
+<td>
+{% if current_user.has_role('Agent') %}
+  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('agent.autorisation_document', autorisation_id=a.id) }}">Voir</a>
+{% elif current_user.has_role('Utilisateur') %}
+  <a class="btn btn-sm btn-outline-primary" href="{{ url_for('utilisateur.autorisation_pdf', demande_id=a.demande.id) }}">PDF</a>
+{% else %}
+  -
+{% endif %}
+</td>
 </tr>
 {% endfor %}
 </tbody></table>

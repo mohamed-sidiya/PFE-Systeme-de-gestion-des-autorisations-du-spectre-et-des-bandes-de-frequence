@@ -6,9 +6,9 @@
 <p><strong>Nature :</strong> {{ demande.type_demande or '-' }}</p>
 <p><strong>Expose des motifs :</strong> {{ demande.objet }}</p>
 <p><strong>Service concerne :</strong> {{ demande.service_concerne or '-' }}</p>
-<p><strong>Statut :</strong> <span class="badge bg-primary">{{ demande.statut }}</span></p>
+<p><strong>Statut :</strong> <span class="badge bg-{{ statut_badge(demande.statut) }}">{{ statut_label(demande.statut) }}</span></p>
 {% if demande.autorisation %}
-<p><strong>Autorisation :</strong> <a href="{{ url_for('agent.autorisation_document', autorisation_id=demande.autorisation.id) }}">{{ demande.autorisation.numero_autorisation }}</a></p>
+<p><strong>Autorisation :</strong> {{ demande.autorisation.numero_autorisation }}</p>
 <a class="btn btn-outline-primary btn-sm" href="{{ url_for('utilisateur.autorisation_pdf', demande_id=demande.id) }}">Telecharger l'autorisation PDF</a>
 {% endif %}
 </div>

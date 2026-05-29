@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.extensions import db
 from app.models import DemandeAutorisation, Observation, Decision, Autorisation, Facture
-from app.utils.constants import ROLE_AGENT, ROLE_UTILISATEUR
+from app.utils.constants import ROLE_AGENT
 from app.utils.decorators import role_required
 from app.utils.audit import log_action
 from app.utils.references import generate_autorisation_number, generate_facture_number
@@ -214,10 +214,7 @@ def generer_autorisation(demande_id):
 
 
 @agent_bp.route("/autorisations/<int:autorisation_id>/document")
-@role_required(ROLE_AGENT, ROLE_UTILISATEUR)
+@role_required(ROLE_AGENT)
 def autorisation_document(autorisation_id):
     autorisation = db.get_or_404(Autorisation, autorisation_id)
-    if current_user.has_role(ROLE_UTILISATEUR) and autorisation.demande.utilisateur_id != current_user.id:
-        flash("Acces interdit.", "danger")
-        return redirect(url_for("utilisateur.demandes"))
     return render_template("agent/autorisation_document.html", autorisation=autorisation)

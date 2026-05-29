@@ -11,7 +11,7 @@ from app.utils.references import generate_demande_reference
 from app.utils.audit import log_action
 from app.utils.files import save_upload
 from app.utils.pdf import build_facture_pdf, build_autorisation_pdf
-from .forms import DemandeForm, PieceForm, ComplementForm
+from .forms import DemandeForm, ComplementForm
 
 utilisateur_bp = Blueprint("utilisateur", __name__, url_prefix="/utilisateur")
 
@@ -143,35 +143,7 @@ def detail_demande(demande_id):
     if demande.utilisateur_id != current_user.id:
         flash("Acces interdit.", "danger")
         return redirect(url_for("utilisateur.demandes"))
-    return render_template("utilisateur/demande_detail.html", demande=demande, piece_form=PieceForm(), complement_form=ComplementForm())
-
-
-@utilisateur_bp.route("/demandes/<int:demande_id>/piece", methods=["POST"])
-@role_required(ROLE_UTILISATEUR)
-@validated_account_required
-def ajouter_piece(demande_id):
-    demande = db.get_or_404(DemandeAutorisation, demande_id)
-    if demande.utilisateur_id != current_user.id:
-        flash("Acces interdit.", "danger")
-        return redirect(url_for("utilisateur.demandes"))
-    form = PieceForm()
-    if form.validate_on_submit():
-        try:
-            saved = save_upload(form.fichier.data)
-        except ValueError as exc:
-            flash(str(exc), "danger")
-            return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
-        piece = PieceJointe(
-            demande_id=demande.id,
-            ajoutee_par_id=current_user.id,
-            type_document=form.type_document.data,
-            **saved
-        )
-        db.session.add(piece)
-        log_action("Ajout piece jointe", demande=demande)
-        db.session.commit()
-        flash("Piece jointe ajoutee.", "success")
-    return redirect(url_for("utilisateur.detail_demande", demande_id=demande.id))
+    return render_template("utilisateur/demande_detail.html", demande=demande, complement_form=ComplementForm())
 
 
 @utilisateur_bp.route("/demandes/<int:demande_id>/payer", methods=["POST"])

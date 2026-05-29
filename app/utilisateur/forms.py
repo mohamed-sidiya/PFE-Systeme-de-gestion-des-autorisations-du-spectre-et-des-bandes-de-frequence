@@ -29,12 +29,6 @@ class DemandeForm(FlaskForm):
     submit = SubmitField("Soumettre la demande")
 
 
-class PieceForm(FlaskForm):
-    type_document = StringField("Type de document", validators=[Optional(), Length(max=100)])
-    fichier = FileField("Fichier", validators=[DataRequired(), FileAllowed(["pdf", "png", "jpg", "jpeg", "doc", "docx"])])
-    submit = SubmitField("Ajouter")
-
-
 class ComplementForm(FlaskForm):
     commentaire = TextAreaField("Reponse au complement", validators=[DataRequired()])
     fichier = FileField("Fichier complementaire", validators=[Optional(), FileAllowed(["pdf", "png", "jpg", "jpeg", "doc", "docx"])])

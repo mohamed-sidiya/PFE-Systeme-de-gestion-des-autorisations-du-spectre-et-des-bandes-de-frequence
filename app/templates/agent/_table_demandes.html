@@ -1,12 +1,19 @@
 <table class="table table-striped mt-3">
-<thead><tr><th>Référence</th><th>Utilisateur</th><th>Objet</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+<thead><tr><th>Reference</th><th>Utilisateur</th><th>Objet</th><th>Statut</th><th>Facture</th><th>Date</th><th></th></tr></thead>
 <tbody>
 {% for d in demandes %}
 <tr>
 <td>{{ d.reference }}</td>
 <td>{{ d.utilisateur.profil.raison_sociale if d.utilisateur.profil else d.utilisateur.email }}</td>
 <td>{{ d.objet }}</td>
-<td><span class="badge bg-primary">{{ d.statut }}</span></td>
+<td><span class="badge bg-{{ statut_badge(d.statut) }}">{{ statut_label(d.statut) }}</span></td>
+<td>
+  {% if d.facture %}
+    <span class="badge bg-{{ 'success' if d.facture.statut == 'payee' else 'warning' }}">{{ d.facture.statut }}</span>
+  {% else %}
+    -
+  {% endif %}
+</td>
 <td>{{ d.date_creation.date() }}</td>
 <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('agent.detail_demande', demande_id=d.id) }}">Traiter</a></td>
 </tr>

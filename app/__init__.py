@@ -3,6 +3,7 @@ from .config import Config
 from .extensions import db, migrate, login_manager, csrf
 from .commands import seed_command, seed_bandes_command
 from .session import PortalSessionInterface
+from .utils.workflow import statut_badge, statut_label
 
 def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True)
@@ -39,5 +40,12 @@ def create_app(config_class=Config):
     @app.route("/")
     def index():
         return redirect(url_for("auth.login_utilisateur"))
+
+    @app.context_processor
+    def workflow_helpers():
+        return {
+            "statut_badge": statut_badge,
+            "statut_label": statut_label,
+        }
 
     return app

@@ -14,7 +14,7 @@
 <p><strong>Nature :</strong> {{ demande.type_demande or '-' }}</p>
 <p><strong>Expose des motifs :</strong> {{ demande.objet }}</p>
 <p><strong>Service concerne :</strong> {{ demande.service_concerne or '-' }}</p>
-<p><strong>Statut :</strong> <span class="badge bg-primary">{{ demande.statut }}</span></p>
+<p><strong>Statut :</strong> <span class="badge bg-{{ statut_badge(demande.statut) }}">{{ statut_label(demande.statut) }}</span></p>
 </div>
 
 <div class="card p-4 mb-3">

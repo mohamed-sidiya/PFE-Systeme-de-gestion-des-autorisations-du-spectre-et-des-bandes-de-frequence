@@ -1,9 +1,12 @@
 <table class="table table-striped mt-3">
-<thead><tr><th>Référence</th><th>Objet</th><th>Statut</th><th>Date</th><th></th></tr></thead>
+<thead><tr><th>Reference</th><th>Objet</th><th>Statut</th><th>Date</th><th></th></tr></thead>
 <tbody>
 {% for d in demandes %}
 <tr>
-<td>{{ d.reference }}</td><td>{{ d.objet }}</td><td><span class="badge bg-primary">{{ d.statut }}</span></td><td>{{ d.date_creation.date() }}</td>
+<td>{{ d.reference }}</td>
+<td>{{ d.objet }}</td>
+<td><span class="badge bg-{{ statut_badge(d.statut) }}">{{ statut_label(d.statut) }}</span></td>
+<td>{{ d.date_creation.date() }}</td>
 <td><a class="btn btn-sm btn-outline-primary" href="{{ url_for('utilisateur.detail_demande', demande_id=d.id) }}">Voir</a></td>
 </tr>
 {% endfor %}
