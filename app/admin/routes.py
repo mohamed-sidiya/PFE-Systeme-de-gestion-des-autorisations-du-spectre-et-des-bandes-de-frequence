@@ -55,6 +55,38 @@ def refuser_compte(user_id):
     flash("Compte refusé.", "info")
     return redirect(url_for("admin.compte_detail", user_id=user.id))
 
+@admin_bp.route("/comptes/<int:user_id>/verifier-nif", methods=["POST"])
+@role_required(ROLE_ADMIN)
+def verifier_nif(user_id):
+    user = db.get_or_404(User, user_id)
+    if not user.profil or not user.profil.identifiant:
+        flash("Aucun NIF n'est renseigne pour ce compte.", "warning")
+        return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+    user.profil.nif_verifie = True
+    user.profil.nif_verifie_par_id = current_user.id
+    user.profil.date_verification_nif = datetime.now(timezone.utc)
+    log_action("Verification NIF", entite="profils_utilisateurs", entite_id=user.profil.id)
+    db.session.commit()
+    flash("NIF verifie.", "success")
+    return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+@admin_bp.route("/comptes/<int:user_id>/annuler-verification-nif", methods=["POST"])
+@role_required(ROLE_ADMIN)
+def annuler_verification_nif(user_id):
+    user = db.get_or_404(User, user_id)
+    if not user.profil:
+        flash("Aucun profil n'est associe a ce compte.", "warning")
+        return redirect(url_for("admin.compte_detail", user_id=user.id))
+
+    user.profil.nif_verifie = False
+    user.profil.nif_verifie_par_id = None
+    user.profil.date_verification_nif = None
+    log_action("Annulation verification NIF", entite="profils_utilisateurs", entite_id=user.profil.id)
+    db.session.commit()
+    flash("Verification NIF annulee.", "info")
+    return redirect(url_for("admin.compte_detail", user_id=user.id))
+
 @admin_bp.route("/comptes/<int:user_id>/suspendre", methods=["POST"])
 @role_required(ROLE_ADMIN)
 def suspendre_compte(user_id):

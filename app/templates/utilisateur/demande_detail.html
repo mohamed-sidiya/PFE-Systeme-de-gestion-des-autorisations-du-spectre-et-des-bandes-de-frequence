@@ -39,19 +39,6 @@
 </div>
 {% endif %}
 
-{% if not demande.autorisation %}
-<div class="card p-4 mb-3">
-<h4>Pieces jointes</h4>
-<ul>
-{% for p in demande.pieces_jointes %}
-  <li><a href="{{ url_for('static', filename=p.chemin) }}" target="_blank" rel="noopener">{{ p.nom_original }}</a> - {{ p.type_document or '-' }}</li>
-{% else %}
-  <li>Aucune piece</li>
-{% endfor %}
-</ul>
-</div>
-{% endif %}
-
 {% if demande.statut == 'complement_demande' %}
 <div class="card p-4 mb-3">
 <h4>Repondre au complement demande</h4>
